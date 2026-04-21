@@ -1,0 +1,295 @@
+---
+import AnchoredLayout from '../layouts/AnchoredLayout.astro';
+import Anchor from '../components/ui/Anchor.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import PullQuote from '../components/ui/PullQuote.astro';
+import SpotifyEmbed from '../components/embeds/SpotifyEmbed.astro';
+import PressList from '../components/patterns/PressList.astro';
+import PressGallery from '../components/patterns/PressGallery.astro';
+import { bioParagraphs, iosAppsGamesBody, awardsRecognitionBody, guestSpotlights } from '../data/content.ts';
+import { pressItems, featuredQuotes } from '../data/press.ts';
+
+const sections = [
+  { id: 'bio',                       label: 'Bio' },
+  { id: 'positions',                 label: 'Positions' },
+  { id: 'worked-with',               label: 'Worked with' },
+  { id: 'ios-apps-games',            label: 'iOS apps & games' },
+  { id: 'awards-recognition',        label: 'Awards & recognition' },
+  { id: 'guest-spotlights',          label: 'Guest spotlights' },
+  { id: 'press-mentions-gallery',    label: 'Press gallery' },
+  { id: 'press-mentions-list',       label: 'Press list' },
+];
+
+const description = "Kelly Nyland's background — 20 years building consumer tech, two IPOs, 130+ products shipped.";
+---
+
+<AnchoredLayout title="Background — Kelly Nyland" description={description} sections={sections}>
+  <!-- Hero -->
+  <header class="bg-hero">
+    <img
+      src="/images/background/headshot-placeholder.svg"
+      alt="Kelly Nyland"
+      width="140"
+      height="140"
+      class="bg-hero__photo"
+    />
+    <h1 class="bg-hero__title">Hi. Nice to meet you.</h1>
+    <p class="bg-hero__lead">{bioParagraphs[0]}</p>
+    {/* TODO KELLY: swap placeholder SVG for 2026 headshot at /images/background/headshot-2026.jpg */}
+  </header>
+
+  <!-- #bio -->
+  <Anchor id="bio" class="bg-section">
+    <Eyebrow>Bio</Eyebrow>
+    <h2 class="bg-h2">About Kelly</h2>
+    <div class="prose">
+      {bioParagraphs.map((p) => <p>{p}</p>)}
+    </div>
+  </Anchor>
+
+  <!-- #positions -->
+  <Anchor id="positions" class="bg-section">
+    <Eyebrow>Positions</Eyebrow>
+    <h2 class="bg-h2">Positions held</h2>
+    <ul class="placeholder-list">
+      <li>CEO / Co-founder · Whym · 2020–2024</li>
+      <li>Head of Marketing · Snap Inc. · Spectacles launch era</li>
+      <li>Head of Brand · Sphero · BB-8 era</li>
+      <li>Head of Marketing · Parrot · AR.Drone launch</li>
+      <li>Advisor / Board positions — see <a href="/founders#advisory-board-angel">Founders</a></li>
+    </ul>
+    <p class="placeholder-note">
+      Placeholder — full title + dates + 1-line scope arriving from Kelly.
+    </p>
+    {/* TODO KELLY: authoritative positions list — title / company / dates / scope */}
+  </Anchor>
+
+  <!-- #worked-with -->
+  <Anchor id="worked-with" class="bg-section">
+    <Eyebrow>Worked with</Eyebrow>
+    <h2 class="bg-h2">Companies & clients</h2>
+    <div class="logo-grid logo-grid--placeholder">
+      {['Snap', 'Sphero', 'Parrot', 'Roli', 'M13', 'Whym', 'Apple', 'Disney', 'Amazon'].map((name) => (
+        <div class="logo-grid__slot">{name}</div>
+      ))}
+    </div>
+    <p class="placeholder-note">Logo files coming — text placeholders for now.</p>
+    {/* TODO KELLY: worked-with logo PNGs (Snap / Sphero / Parrot / Roli / M13 / Whym / Apple / Disney / Amazon / etc.) */}
+  </Anchor>
+
+  <!-- #ios-apps-games -->
+  <Anchor id="ios-apps-games" class="bg-section">
+    <Eyebrow>iOS apps & games</Eyebrow>
+    <h2 class="bg-h2">143 weeks at the top of the charts</h2>
+    <div class="prose">
+      <p>{iosAppsGamesBody}</p>
+    </div>
+    <div class="app-grid app-grid--placeholder">
+      {Array.from({ length: 6 }).map(() => <div class="app-grid__slot" aria-hidden="true" />)}
+    </div>
+    <p class="placeholder-note">App icons + names + roles — coming from Kelly.</p>
+    {/* TODO KELLY: app icon images + names + roles for ios-apps-games grid */}
+  </Anchor>
+
+  <!-- #awards-recognition -->
+  <Anchor id="awards-recognition" class="bg-section">
+    <Eyebrow>Awards & recognition</Eyebrow>
+    <h2 class="bg-h2">Awards & recognition</h2>
+    <div class="prose">
+      <p>{awardsRecognitionBody}</p>
+    </div>
+    <div class="logo-grid logo-grid--placeholder">
+      {['Cannes Lions', 'Shorty Awards', 'Core77', 'Webby', 'Fast Company', 'Time'].map((name) => (
+        <div class="logo-grid__slot">{name}</div>
+      ))}
+    </div>
+    <p class="placeholder-note">Individual award logos coming from Kelly.</p>
+    {/* TODO KELLY: award logo files for awards-recognition grid */}
+  </Anchor>
+
+  <!-- #guest-spotlights -->
+  <Anchor id="guest-spotlights" class="bg-section">
+    <Eyebrow>Guest spotlights</Eyebrow>
+    <h2 class="bg-h2">{guestSpotlights.title}</h2>
+    <p class="bg-subtitle">{guestSpotlights.subtitle}</p>
+    <div class="prose">
+      <p>{guestSpotlights.description}</p>
+    </div>
+    <SpotifyEmbed id={guestSpotlights.spotifyPlaylistId} type="playlist" title="Kelly Nyland — Guest Spotlights playlist" />
+  </Anchor>
+
+  <!-- #press-mentions-gallery -->
+  <Anchor id="press-mentions-gallery" class="bg-section">
+    <Eyebrow>Press gallery</Eyebrow>
+    <h2 class="bg-h2">Press mentions</h2>
+    <div class="pull-row">
+      {featuredQuotes.map((q) => (
+        <PullQuote attribution={q.author} outlet={q.source}>
+          {q.quote}
+        </PullQuote>
+      ))}
+    </div>
+    <PressGallery items={pressItems} placeholder />
+  </Anchor>
+
+  <!-- #press-mentions-list -->
+  <Anchor id="press-mentions-list" class="bg-section">
+    <Eyebrow>Press list</Eyebrow>
+    <h2 class="bg-h2">All press — text index</h2>
+    <p class="bg-subtitle">Every article, interview, and podcast appearance in one scannable list.</p>
+    <PressList items={pressItems} />
+  </Anchor>
+</AnchoredLayout>
+
+<style>
+  .bg-hero {
+    text-align: left;
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+    margin-bottom: var(--space-12);
+  }
+  .bg-hero__photo {
+    width: 140px;
+    height: 140px;
+    border-radius: 999px;
+    object-fit: cover;
+    margin-bottom: var(--space-6);
+    background: var(--color-surface);
+  }
+  .bg-hero__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-4xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  .bg-hero__lead {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+  }
+
+  .bg-section {
+    padding-block: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .bg-section:last-child {
+    border-bottom: none;
+  }
+
+  .bg-h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-6);
+  }
+
+  .bg-subtitle {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: var(--text-lg);
+    color: var(--color-ink);
+    margin-bottom: var(--space-6);
+    max-width: var(--width-prose);
+  }
+
+  .prose {
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-6);
+  }
+  .prose p {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  .prose a {
+    color: var(--color-orange-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .placeholder-list {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    padding-left: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .placeholder-list li {
+    list-style: disc;
+    margin-left: var(--space-4);
+    margin-bottom: var(--space-2);
+  }
+  .placeholder-list a {
+    color: var(--color-orange-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .placeholder-note {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    padding: var(--space-3) var(--space-4);
+    border: 1px dashed var(--color-muted);
+    border-radius: var(--radius-md);
+    display: inline-block;
+    margin-top: var(--space-4);
+  }
+
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+  @media (min-width: 640px) {
+    .logo-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .logo-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .logo-grid__slot {
+    aspect-ratio: 3 / 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    letter-spacing: 0.04em;
+  }
+
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+  @media (min-width: 768px) {
+    .app-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+  .app-grid__slot {
+    aspect-ratio: 1 / 1;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+  }
+
+  .pull-row {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+  }
+  @media (min-width: 1024px) {
+    .pull-row { grid-template-columns: repeat(3, 1fr); }
+    .pull-row :global(.pullquote) { margin: 0; }
+  }
+</style>

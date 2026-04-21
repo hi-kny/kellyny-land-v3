@@ -10,8 +10,10 @@
   --color-blue:    #6a9bcc;
   --color-green:   #788c5d;
 
-  /* AA-compliant orange for inline body links */
-  --color-orange-text: #b95a3c;
+  /* AA-compliant orange for inline body links + eyebrows.
+     Darkened from the plan's #b95a3c (4.1:1) to #a94e30 (~5.2:1)
+     so Lighthouse strict AA passes on normal-size text. */
+  --color-orange-text: #a94e30;
 
   /* Semantic aliases */
   --color-link:        var(--color-orange-text);

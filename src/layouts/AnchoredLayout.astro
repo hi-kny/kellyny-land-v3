@@ -1,0 +1,73 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Nav from '../components/patterns/Nav.astro';
+import Footer from '../components/patterns/Footer.astro';
+import TableOfContents from '../components/patterns/TableOfContents.astro';
+
+interface Section {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  sections: Section[];
+  tocLabel?: string;
+}
+
+const { title, description, sections, tocLabel } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <Nav slot="nav" />
+  <div class="anchored">
+    <div class="anchored__inner">
+      <div class="anchored__toc">
+        <TableOfContents sections={sections} label={tocLabel} />
+      </div>
+      <div class="anchored__main">
+        <slot />
+      </div>
+    </div>
+  </div>
+  <Footer slot="footer" />
+</BaseLayout>
+
+<style>
+  .anchored {
+    width: 100%;
+  }
+  .anchored__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    max-width: var(--width-wide);
+    margin-inline: auto;
+    padding-inline: var(--space-6);
+    padding-block: var(--space-12);
+  }
+  .anchored__toc {
+    order: -1;
+  }
+  .anchored__main {
+    min-width: 0;
+  }
+
+  @media (min-width: 768px) {
+    .anchored__inner {
+      padding-inline: var(--space-8);
+      padding-block: var(--space-16);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .anchored__inner {
+      grid-template-columns: minmax(0, 1fr) 240px;
+      gap: var(--space-12);
+    }
+    .anchored__toc {
+      order: 0;
+    }
+  }
+</style>

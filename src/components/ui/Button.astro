@@ -60,15 +60,16 @@ const isLink = 'href' in rest && rest.href;
     font-size: var(--text-lg);
   }
 
-  /* Primary — Orange fill, canvas text */
+  /* Primary — Orange fill with ink text (AA-safe contrast at all sizes) */
   .btn--primary {
     background: var(--color-cta-bg);
-    color: var(--color-cta-text);
+    color: var(--color-ink);
     border-color: var(--color-cta-bg);
   }
   .btn--primary:hover {
     background: var(--color-orange-text);
     border-color: var(--color-orange-text);
+    color: var(--color-canvas);
   }
   .btn--primary:active {
     transform: translateY(1px);

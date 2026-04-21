@@ -17,7 +17,7 @@ function isActive(href: string): boolean {
 
 <nav class="site-nav" aria-label="Main navigation">
   <div class="site-nav__inner">
-    <a href="/" class="site-nav__brand" aria-label="Kelly Nyland — home">
+    <a href="/" class="site-nav__brand">
       kellyny.land
     </a>
 
@@ -53,7 +53,7 @@ function isActive(href: string): boolean {
     </button>
   </div>
 
-  <div id="mobile-menu" class="site-nav__overlay" aria-hidden="true">
+  <div id="mobile-menu" class="site-nav__overlay" inert>
     <div class="site-nav__overlay-inner">
       <ul role="list" class="site-nav__overlay-links">
         {links.map((link) => (
@@ -93,7 +93,7 @@ function isActive(href: string): boolean {
       lastFocused = document.activeElement as HTMLElement;
       toggle.setAttribute('aria-expanded', 'true');
       toggle.setAttribute('aria-label', 'Close navigation menu');
-      overlay.setAttribute('aria-hidden', 'false');
+      overlay.removeAttribute('inert');
       nav.classList.add('is-open');
       document.body.style.overflow = 'hidden';
       const first = getFocusable()[0];
@@ -103,7 +103,7 @@ function isActive(href: string): boolean {
     const close = () => {
       toggle.setAttribute('aria-expanded', 'false');
       toggle.setAttribute('aria-label', 'Open navigation menu');
-      overlay.setAttribute('aria-hidden', 'true');
+      overlay.setAttribute('inert', '');
       nav.classList.remove('is-open');
       document.body.style.overflow = '';
       if (lastFocused) lastFocused.focus();
@@ -219,16 +219,19 @@ function isActive(href: string): boolean {
     padding: var(--space-2) var(--space-6);
     border-radius: 999px;
     background: var(--color-cta-bg);
-    color: var(--color-cta-text);
+    color: var(--color-ink);
     font-family: var(--font-display);
     font-weight: 600;
     font-size: var(--text-sm);
     text-decoration: none;
     white-space: nowrap;
-    transition: background-color var(--motion-fast) var(--ease-out);
+    transition:
+      background-color var(--motion-fast) var(--ease-out),
+      color var(--motion-fast) var(--ease-out);
   }
   .site-nav__cta:hover {
     background: var(--color-orange-text);
+    color: var(--color-canvas);
   }
 
   .site-nav__toggle {

@@ -1,0 +1,119 @@
+---
+import JsonLd from '../components/ui/JsonLd.astro';
+import '../styles/global.css';
+
+// Fonts — self-hosted via fontsource.
+// Poppins (display): 400 / 500 / 600 / 700
+// Lora (body): 400 / 500 / 700 + 400-italic / 700-italic
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '@fontsource/lora/400.css';
+import '@fontsource/lora/500.css';
+import '@fontsource/lora/700.css';
+import '@fontsource/lora/400-italic.css';
+import '@fontsource/lora/700-italic.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: string;
+  canonicalUrl?: string;
+}
+
+const {
+  title,
+  description = 'Kelly Nyland — tech founder, AI strategist, and builder.',
+  ogImage,
+  ogType = 'website',
+  canonicalUrl,
+} = Astro.props;
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? 'https://kellyny.land';
+const pageUrl = canonicalUrl ?? new URL(Astro.url.pathname, siteUrl).toString();
+const fullOgImage = ogImage
+  ? ogImage.startsWith('http')
+    ? ogImage
+    : `${siteUrl}${ogImage}`
+  : undefined;
+
+// WebSite + Person schema on every page
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Kelly Nyland',
+  url: siteUrl,
+  description,
+};
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Kelly Nyland',
+  url: siteUrl,
+  sameAs: [
+    'https://www.linkedin.com/in/kellynyland/',
+    'https://twitter.com/kellynyland',
+    'https://www.tiktok.com/@kellynyland',
+    'https://www.youtube.com/@kellynyland',
+    'https://substack.com/@motherofdata',
+  ],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#faf9f5" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <link rel="canonical" href={canonicalUrl ?? pageUrl} />
+
+    {/* TODO KLY-60: preload Poppins 700 + Lora 400 woff2 from hashed build URLs for LCP. */}
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="Kelly Nyland" />
+    {fullOgImage && <meta property="og:image" content={fullOgImage} />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content={fullOgImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {fullOgImage && <meta name="twitter:image" content={fullOgImage} />}
+
+    <!-- Feeds & Discoverability -->
+    <link rel="alternate" type="application/rss+xml" title="Kelly Nyland" href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- TODO KELLY: Re-add GA4 behind ConsentBanner (KLY-58) with new kellyny.land property ID. -->
+
+    <!-- Base structured data -->
+    <JsonLd schema={[websiteSchema, personSchema]} />
+
+    <!-- Per-page structured data slot -->
+    <slot name="head" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    <slot name="nav" />
+    <main id="main-content">
+      <slot />
+    </main>
+    <slot name="footer" />
+  </body>
+</html>

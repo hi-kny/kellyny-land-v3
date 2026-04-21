@@ -1,0 +1,242 @@
+---
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+import MarqueeDivider from './MarqueeDivider.astro'
+import SplitSection from './SplitSection.astro'
+import SectionGallery from './SectionGallery.astro'
+import FigmaEmbed from './FigmaEmbed.astro'
+import YouTubeEmbed from './YouTubeEmbed.astro'
+
+interface CaseStudySection {
+  id: string
+  label: string
+  heading?: string
+  notes?: string[]
+  description?: string[]
+  images?: (ImageMetadata | string)[]
+  figmaEmbed?: string
+}
+
+interface CaseStudyVideo {
+  id: string
+  title: string
+}
+
+interface CaseStudySibling {
+  slug: string
+  title: string
+}
+
+export interface PortfolioProject {
+  slug: string
+  title: string
+  category?: string
+  tagline?: string
+  status?: string
+  layout?: 'casestudy' | 'simple' | string
+  heroImage?: ImageMetadata | string
+  description?: string[]
+  images?: (ImageMetadata | string)[]
+  sections?: CaseStudySection[]
+  videos?: CaseStudyVideo[]
+  prev?: CaseStudySibling | null
+  next?: CaseStudySibling | null
+}
+
+interface Props {
+  project: PortfolioProject
+}
+
+const { project } = Astro.props
+
+const prev = project.prev ?? null
+const next = project.next ?? null
+
+const resolveImgSrc = (img: ImageMetadata | string): string =>
+  typeof img === 'string' ? img : img.src
+---
+
+<article class="casestudy">
+  {project.heroImage && (
+    <section class="casestudy-hero">
+      {typeof project.heroImage === 'string' ? (
+        <img src={project.heroImage} alt={project.title} class="hero-image" width="1440" height="810" />
+      ) : (
+        <Image src={project.heroImage} alt={project.title} class="hero-image" width={1440} height={810} />
+      )}
+    </section>
+  )}
+
+  {project.layout === 'casestudy' && project.sections ? (
+    project.sections.map((section) => (
+      <div class="casestudy-section">
+        <MarqueeDivider label={section.label} />
+        {(section.heading || section.notes || section.description) && (
+          <SplitSection heading={section.heading} notes={section.notes}>
+            {section.description && section.description.map((para) => <p>{para}</p>)}
+          </SplitSection>
+        )}
+        {section.images && section.images.length > 0 && (
+          <SectionGallery
+            images={section.images.map((img) => resolveImgSrc(img))}
+            projectTitle={project.title}
+            sectionId={`${project.slug}-${section.id}`}
+            columns={section.images.length === 1 ? 1 : 2}
+          />
+        )}
+        {section.figmaEmbed && (
+          <FigmaEmbed url={section.figmaEmbed} title={`${project.title} — ${section.label}`} />
+        )}
+      </div>
+    ))
+  ) : (
+    <!-- Simple layout: title, description, gallery -->
+    <div class="casestudy-simple">
+      <div class="simple-header">
+        <p class="simple-category">{project.category}</p>
+        <h1 class="simple-title">{project.title}</h1>
+        {project.tagline && <p class="simple-tagline">{project.tagline}</p>}
+        {project.status && <p class="simple-status">{project.status}</p>}
+      </div>
+
+      {project.description && project.description.length > 0 && (
+        <div class="simple-description">
+          {project.description.map((para) => <p>{para}</p>)}
+        </div>
+      )}
+
+      {project.images && project.images.length > 0 && (
+        <SectionGallery
+          images={project.images.map((img) => resolveImgSrc(img))}
+          projectTitle={project.title}
+          sectionId={`${project.slug}-gallery`}
+          columns={project.images.length === 1 ? 1 : 2}
+        />
+      )}
+
+      {project.videos && project.videos.length > 0 && (
+        <div class="simple-videos">
+          {project.videos.map((v) => (
+            <div class="simple-video">
+              <YouTubeEmbed videoId={v.id} title={v.title} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
+
+  <nav class="project-nav" aria-label="Project navigation">
+    {prev ? (
+      <a href={`/${prev.slug}`} class="nav-link nav-prev">
+        <span class="nav-label">Previous</span>
+        <span class="nav-title">{prev.title}</span>
+      </a>
+    ) : (
+      <span />
+    )}
+    {next ? (
+      <a href={`/${next.slug}`} class="nav-link nav-next">
+        <span class="nav-label">Next</span>
+        <span class="nav-title">{next.title}</span>
+      </a>
+    ) : (
+      <span />
+    )}
+  </nav>
+</article>
+
+<style>
+  .casestudy-hero {
+    width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface);
+  }
+  .hero-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    max-height: 80vh;
+  }
+
+  .casestudy-simple {
+    max-width: 64rem;
+    margin-inline: auto;
+    padding: clamp(2rem, 5vw, 4rem) var(--space-6);
+  }
+  .simple-header { margin-bottom: clamp(2rem, 4vw, 3rem); }
+  .simple-category {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--space-2);
+  }
+  .simple-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-body);
+    font-weight: 600;
+  }
+  .simple-tagline {
+    font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+    color: var(--color-ink);
+    line-height: 1.5;
+    margin: 0 0 var(--space-2);
+    font-style: italic;
+  }
+  .simple-status {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin: 0;
+  }
+  .simple-description {
+    font-size: clamp(0.9375rem, 1.25vw, 1.0625rem);
+    line-height: 1.7;
+    color: var(--color-ink);
+    margin-bottom: var(--space-8);
+  }
+  .simple-description p { margin: 0 0 var(--space-4); }
+  .simple-videos {
+    margin-top: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .project-nav {
+    max-width: 48rem;
+    margin: clamp(2rem, 4vw, 3rem) auto 0;
+    padding: clamp(2rem, 4vw, 3rem) var(--space-6) clamp(3rem, 6vw, 5rem);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+  .nav-link {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .nav-link:hover { opacity: 0.7; }
+  .nav-prev { align-items: flex-start; }
+  .nav-next { align-items: flex-end; margin-left: auto; }
+  .nav-label {
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+  .nav-title {
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+</style>

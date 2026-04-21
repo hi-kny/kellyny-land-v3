@@ -1,0 +1,51 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type SectionVariant = 'narrow' | 'content' | 'wide' | 'bleed';
+
+interface Props extends HTMLAttributes<'section'> {
+  variant?: SectionVariant;
+  as?: 'section' | 'div' | 'article' | 'aside';
+  padded?: boolean;
+}
+
+const {
+  variant = 'content',
+  as: Tag = 'section',
+  padded = true,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classList = ['sec', `sec--${variant}`, padded && 'sec--padded', className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<Tag class={classList} {...rest}>
+  <slot />
+</Tag>
+
+<style>
+  .sec {
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  .sec--padded {
+    padding-inline: var(--space-6);
+    padding-block: var(--space-12);
+  }
+
+  .sec--narrow  { max-width: var(--width-prose); }
+  .sec--content { max-width: var(--width-content); }
+  .sec--wide    { max-width: var(--width-wide); }
+  .sec--bleed   { max-width: none; padding-inline: 0; }
+
+  @media (min-width: 768px) {
+    .sec--padded {
+      padding-inline: var(--space-8);
+      padding-block: var(--space-16);
+    }
+  }
+</style>

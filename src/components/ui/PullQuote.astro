@@ -1,0 +1,57 @@
+---
+interface Props {
+  attribution?: string;
+  outlet?: string;
+  class?: string;
+}
+
+const { attribution, outlet, class: className = '' } = Astro.props;
+const classList = ['pullquote', className].filter(Boolean).join(' ');
+---
+
+<figure class={classList}>
+  <blockquote class="pullquote__body">
+    <slot />
+  </blockquote>
+  {(attribution || outlet) && (
+    <figcaption class="pullquote__cite">
+      {attribution && <span class="pullquote__attr">{attribution}</span>}
+      {outlet && <span class="pullquote__outlet"> · {outlet}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .pullquote {
+    margin: var(--space-12) 0;
+    padding-left: var(--space-6);
+    border-left: 3px solid var(--color-orange);
+  }
+
+  .pullquote__body {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: var(--text-xl);
+    line-height: var(--leading-snug);
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .pullquote__body {
+      font-size: var(--text-2xl);
+    }
+  }
+
+  .pullquote__cite {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-top: var(--space-3);
+  }
+
+  .pullquote__outlet {
+    color: var(--color-muted);
+  }
+</style>

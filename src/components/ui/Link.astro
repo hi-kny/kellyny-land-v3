@@ -1,0 +1,58 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type LinkVariant = 'inline' | 'ghost';
+
+interface Props extends HTMLAttributes<'a'> {
+  variant?: LinkVariant;
+  external?: boolean;
+}
+
+const { variant = 'inline', external = false, class: className = '', href, ...rest } = Astro.props;
+
+const isExternal =
+  external ||
+  (typeof href === 'string' &&
+    (href.startsWith('http://') || href.startsWith('https://')) &&
+    !href.includes('kellyny.land'));
+
+const target = isExternal ? '_blank' : undefined;
+const rel = isExternal ? 'noopener noreferrer' : undefined;
+
+const classList = ['lnk', `lnk--${variant}`, className].filter(Boolean).join(' ');
+---
+
+<a class={classList} href={href} target={target} rel={rel} {...rest}>
+  <slot />
+</a>
+
+<style>
+  .lnk {
+    color: var(--color-link);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease-out);
+  }
+
+  .lnk--inline {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .lnk--inline:hover {
+    color: var(--color-link-hover);
+    text-decoration-thickness: 2px;
+  }
+
+  .lnk--ghost {
+    text-decoration: none;
+  }
+  .lnk--ghost:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .lnk:visited {
+    color: var(--color-link);
+  }
+</style>

@@ -1,0 +1,30 @@
+---
+interface Props {
+  type: 'playlist' | 'episode' | 'show'
+  id: string
+  height?: number
+}
+
+const { type, id, height = 352 } = Astro.props
+const src = `https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`
+---
+
+<div class="spotify-embed">
+  <iframe
+    src={src}
+    width="100%"
+    height={height}
+    loading="lazy"
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+    allowfullscreen
+    style={`border-radius: 12px; border: 0; height: ${height}px;`}
+  ></iframe>
+</div>
+
+<style>
+  .spotify-embed {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+</style>

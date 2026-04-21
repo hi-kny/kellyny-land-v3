@@ -1,0 +1,64 @@
+---
+interface Props {
+  notes?: string[]
+  heading?: string
+}
+
+const { notes, heading } = Astro.props
+---
+
+<div class="split-section">
+  {(heading || (notes && notes.length > 0)) && (
+    <aside class="split-left">
+      {heading && <h2 class="split-heading">{heading}</h2>}
+      {notes && notes.map((note) => <p class="split-note">{note}</p>)}
+    </aside>
+  )}
+  <div class="split-right">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .split-section {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: clamp(2rem, 5vw, 4rem) var(--space-6);
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: clamp(2rem, 4vw, 4rem);
+    align-items: start;
+  }
+  .split-left { position: sticky; top: var(--space-24); }
+  .split-heading {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    color: var(--color-ink);
+    margin: 0 0 var(--space-6);
+    letter-spacing: -0.02em;
+    line-height: var(--leading-tight);
+    font-family: var(--font-body);
+  }
+  .split-note {
+    font-size: clamp(0.875rem, 1.25vw, 1rem);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    margin: 0 0 var(--space-3);
+    font-weight: 600;
+  }
+  .split-note :global(em) {
+    font-style: italic;
+    font-weight: 400;
+  }
+  .split-right {
+    font-size: clamp(0.9375rem, 1.25vw, 1.0625rem);
+    line-height: 1.7;
+    color: var(--color-ink);
+  }
+  .split-right :global(p) { margin: 0 0 var(--space-4); }
+  .split-right :global(p:last-child) { margin-bottom: 0; }
+  @media (max-width: 768px) {
+    .split-section { grid-template-columns: 1fr; gap: var(--space-6); }
+    .split-left { position: static; }
+  }
+</style>

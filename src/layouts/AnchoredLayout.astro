@@ -23,12 +23,12 @@ const { title, description, sections, tocLabel } = Astro.props;
   <Nav slot="nav" />
   <div class="anchored">
     <div class="anchored__inner">
-      <div class="anchored__toc">
-        <TableOfContents sections={sections} label={tocLabel} />
-      </div>
       <div class="anchored__main">
         <slot />
       </div>
+      <aside class="anchored__toc">
+        <TableOfContents sections={sections} label={tocLabel} />
+      </aside>
     </div>
   </div>
   <Footer slot="footer" />
@@ -47,6 +47,7 @@ const { title, description, sections, tocLabel } = Astro.props;
     padding-inline: var(--space-6);
     padding-block: var(--space-12);
   }
+  /* Mobile: TOC dropdown sits above main content */
   .anchored__toc {
     order: -1;
   }
@@ -61,6 +62,7 @@ const { title, description, sections, tocLabel } = Astro.props;
     }
   }
 
+  /* Desktop: main on left (1fr), narrow TOC right rail (240px) */
   @media (min-width: 1024px) {
     .anchored__inner {
       grid-template-columns: minmax(0, 1fr) 240px;

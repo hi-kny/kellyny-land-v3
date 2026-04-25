@@ -1,0 +1,48 @@
+---
+interface Props {
+  videoId?: string
+  playlistId?: string
+  title: string
+}
+
+const { videoId, playlistId, title } = Astro.props
+
+let src = ''
+if (playlistId) {
+  src = `https://www.youtube-nocookie.com/embed/videoseries?list=${playlistId}`
+} else if (videoId) {
+  src = `https://www.youtube-nocookie.com/embed/${videoId}`
+}
+---
+
+{src && (
+  <div class="embed-container" style="aspect-ratio: 16/9;">
+    <iframe
+      src={src}
+      title={title}
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+    ></iframe>
+  </div>
+)}
+
+<style>
+  .embed-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--color-ink);
+    margin-block: var(--space-6);
+  }
+
+  .embed-container iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>

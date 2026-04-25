@@ -1,0 +1,270 @@
+---
+interface GalleryImage {
+  src: string
+  alt: string
+  caption?: string
+}
+
+interface Props {
+  images: GalleryImage[]
+  desktopColumns?: 1 | 2 | 3
+  mobileColumns?: 1 | 2
+  gap?: string
+  aspectRatio?: string
+  lightbox?: boolean
+}
+
+const {
+  images,
+  desktopColumns = 3,
+  mobileColumns = 1,
+  gap = '1rem',
+  aspectRatio,
+  lightbox = true
+} = Astro.props
+
+const galleryId = `gallery-${Math.random().toString(36).slice(2, 8)}`
+---
+
+<div
+  class="image-gallery"
+  id={galleryId}
+  style={`--desktop-cols: ${desktopColumns}; --mobile-cols: ${mobileColumns}; --gap: ${gap};`}
+>
+  {images.map((image, i) => (
+    <figure class="gallery-item">
+      {lightbox ? (
+        <button
+          class="gallery-trigger"
+          data-lb={galleryId}
+          data-index={i}
+          aria-label={`View ${image.alt} full size`}
+        >
+          <img
+            src={image.src}
+            alt={image.alt}
+            class="gallery-image"
+            loading="lazy"
+            decoding="async"
+            style={aspectRatio ? `aspect-ratio: ${aspectRatio}; object-fit: cover;` : ''}
+          />
+        </button>
+      ) : (
+        <img
+          src={image.src}
+          alt={image.alt}
+          class="gallery-image"
+          loading="lazy"
+          decoding="async"
+          style={aspectRatio ? `aspect-ratio: ${aspectRatio}; object-fit: cover;` : ''}
+        />
+      )}
+      {image.caption && <figcaption>{image.caption}</figcaption>}
+    </figure>
+  ))}
+</div>
+
+{lightbox && (
+  <div
+    class="gallery-lightbox"
+    id={`lightbox-${galleryId}`}
+    aria-hidden="true"
+    role="dialog"
+    aria-label="Image gallery"
+  >
+    <button class="lb-close" aria-label="Close gallery">&times;</button>
+    <button class="lb-prev" aria-label="Previous image">&#8249;</button>
+    <button class="lb-next" aria-label="Next image">&#8250;</button>
+    <div class="lb-content">
+      <img class="lb-img" src="" alt="" />
+      <p class="lb-caption"></p>
+    </div>
+  </div>
+)}
+
+{lightbox && (
+  <script define:vars={{ galleryId, images }}>
+    (() => {
+      const lightbox = document.getElementById(`lightbox-${galleryId}`)
+      if (!lightbox) return
+
+      const lbImg = lightbox.querySelector('.lb-img')
+      const lbCaption = lightbox.querySelector('.lb-caption')
+      let currentIndex = 0
+
+      function open(index) {
+        currentIndex = index
+        lbImg.src = images[index].src
+        lbImg.alt = images[index].alt
+        lbCaption.textContent = images[index].caption || images[index].alt
+        lightbox.setAttribute('aria-hidden', 'false')
+        document.body.style.overflow = 'hidden'
+        lightbox.querySelector('.lb-close')?.focus()
+      }
+
+      function close() {
+        lightbox.setAttribute('aria-hidden', 'true')
+        document.body.style.overflow = ''
+        const trigger = document.querySelector(`[data-lb="${galleryId}"][data-index="${currentIndex}"]`)
+        trigger?.focus()
+      }
+
+      function navigate(dir) {
+        currentIndex = (currentIndex + dir + images.length) % images.length
+        open(currentIndex)
+      }
+
+      document.querySelectorAll(`[data-lb="${galleryId}"]`).forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.getAttribute('data-index') || '0', 10)
+          open(idx)
+        })
+      })
+
+      lightbox.querySelector('.lb-close')?.addEventListener('click', close)
+      lightbox.querySelector('.lb-prev')?.addEventListener('click', () => navigate(-1))
+      lightbox.querySelector('.lb-next')?.addEventListener('click', () => navigate(1))
+
+      lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) close()
+      })
+
+      document.addEventListener('keydown', (e) => {
+        if (lightbox.getAttribute('aria-hidden') === 'true') return
+        if (e.key === 'Escape') close()
+        if (e.key === 'ArrowLeft') navigate(-1)
+        if (e.key === 'ArrowRight') navigate(1)
+      })
+    })()
+  </script>
+)}
+
+<style>
+  .image-gallery {
+    display: grid;
+    grid-template-columns: repeat(var(--desktop-cols), 1fr);
+    gap: var(--gap);
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .image-gallery {
+      grid-template-columns: repeat(var(--mobile-cols), 1fr);
+    }
+  }
+
+  .gallery-item {
+    margin: 0;
+  }
+
+  .gallery-item figcaption {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-top: var(--space-2);
+  }
+
+  .gallery-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  .gallery-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Lightbox */
+  .gallery-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(20, 20, 19, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--motion-base) var(--ease-out);
+  }
+
+  .gallery-lightbox[aria-hidden='false'] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .lb-content {
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .lb-img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+  }
+
+  .lb-caption {
+    color: var(--color-surface);
+    font-size: var(--text-sm);
+    margin: var(--space-4) 0 0;
+  }
+
+  .lb-close {
+    position: absolute;
+    top: var(--space-6);
+    right: var(--space-6);
+    background: none;
+    border: none;
+    color: var(--color-canvas);
+    font-size: 2.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: var(--space-1) var(--space-2);
+    z-index: 1;
+  }
+
+  .lb-prev,
+  .lb-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-canvas);
+    font-size: 3rem;
+    cursor: pointer;
+    padding: var(--space-2) var(--space-4);
+    z-index: 1;
+    opacity: 0.6;
+    transition: opacity var(--motion-fast) var(--ease-out);
+  }
+
+  .lb-prev:hover,
+  .lb-next:hover {
+    opacity: 1;
+  }
+
+  .lb-prev { left: var(--space-4); }
+  .lb-next { right: var(--space-4); }
+
+  @media (max-width: 480px) {
+    .lb-prev,
+    .lb-next {
+      font-size: 2rem;
+      padding: var(--space-1) var(--space-2);
+    }
+  }
+
+  @media print {
+    .gallery-lightbox { display: none; }
+  }
+</style>

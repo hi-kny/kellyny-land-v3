@@ -1,0 +1,81 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  image: ImageMetadata;
+  alt: string;
+  url?: string;
+}
+
+const { image, alt, url } = Astro.props;
+const Tag = url ? 'a' : 'div';
+const linkProps = url ? { href: url, target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<Tag class:list={['press-card', { 'press-card--linked': !!url }]} {...linkProps}>
+  <Image
+    src={image}
+    alt={alt}
+    class="press-card__image"
+    loading="lazy"
+    width={400}
+    height={300}
+  />
+  {url && (
+    <span class="press-card__overlay" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+    </span>
+  )}
+</Tag>
+
+<style>
+  .press-card {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    transition: transform var(--motion-base) var(--ease-out), box-shadow var(--motion-base) var(--ease-out);
+  }
+
+  .press-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .press-card--linked {
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .press-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 4 / 3;
+    display: block;
+  }
+
+  .press-card__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--color-canvas);
+    opacity: 0;
+    transition: opacity var(--motion-base) var(--ease-out);
+  }
+
+  .press-card--linked:hover .press-card__overlay {
+    opacity: 1;
+  }
+</style>

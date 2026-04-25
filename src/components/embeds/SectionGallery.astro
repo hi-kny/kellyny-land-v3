@@ -1,0 +1,70 @@
+---
+import ImageLightbox from './ImageLightbox.astro'
+
+interface Props {
+  images: string[]
+  projectTitle: string
+  sectionId: string
+  columns?: 1 | 2 | 3
+}
+
+const { images, projectTitle, sectionId, columns = 2 } = Astro.props
+const lightboxId = `gallery-${sectionId}`
+const lightboxImages = images.map((src, i) => ({
+  src,
+  alt: `${projectTitle} — ${sectionId} ${i + 1}`,
+}))
+---
+
+<div class:list={['section-gallery', `cols-${columns}`]}>
+  {images.map((src, i) => (
+    <button
+      class="gallery-trigger"
+      data-lb={lightboxId}
+      data-index={i}
+      aria-label={`View image ${i + 1} full size`}
+    >
+      <img
+        src={src}
+        alt={`${projectTitle} — ${sectionId} ${i + 1}`}
+        class="gallery-image"
+        loading="lazy"
+        width="1200"
+        height="800"
+      />
+    </button>
+  ))}
+</div>
+
+<ImageLightbox id={lightboxId} images={lightboxImages} />
+
+<style>
+  .section-gallery {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: 0 var(--space-6) clamp(1rem, 2vw, 2rem);
+    display: grid;
+    gap: clamp(0.75rem, 1.5vw, 1rem);
+  }
+  .cols-1 { grid-template-columns: 1fr; }
+  .cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+  .gallery-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+  }
+  .gallery-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radius-sm);
+  }
+  @media (max-width: 640px) {
+    .cols-2, .cols-3 { grid-template-columns: 1fr; }
+  }
+</style>

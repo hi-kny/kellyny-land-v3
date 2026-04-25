@@ -1,0 +1,87 @@
+---
+import type { PressItem } from '../../data/press.ts';
+
+interface Props {
+  items: PressItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="press-list" role="list">
+  {items.map((item) => (
+    <li class="press-list__row">
+      <div class="press-list__meta">
+        {item.date && <span class="press-list__date">{item.date}</span>}
+        {item.outlet && <span class="press-list__outlet">{item.outlet}</span>}
+      </div>
+      <a
+        class="press-list__headline"
+        href={item.url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {item.headline}
+        <span class="press-list__cta" aria-hidden="true">Read →</span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .press-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-rule);
+  }
+  .press-list__row {
+    display: grid;
+    gap: var(--space-2);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .press-list__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+  .press-list__date {
+    font-weight: 600;
+  }
+  .press-list__outlet {
+    color: var(--color-orange-text);
+  }
+  .press-list__headline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-3);
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .press-list__headline:hover {
+    color: var(--color-orange-text);
+  }
+  .press-list__cta {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--color-orange-text);
+    white-space: nowrap;
+  }
+  @media (min-width: 768px) {
+    .press-list__row {
+      grid-template-columns: 180px 1fr;
+      align-items: baseline;
+      gap: var(--space-6);
+    }
+  }
+</style>

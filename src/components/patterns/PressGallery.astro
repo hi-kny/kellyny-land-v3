@@ -1,0 +1,127 @@
+---
+import type { PressItem } from '../../data/press.ts';
+
+interface Props {
+  items: PressItem[];
+  placeholder?: boolean;
+}
+
+const { items, placeholder = true } = Astro.props;
+---
+
+<div class="press-gallery">
+  {placeholder && (
+    <p class="press-gallery__note">
+      Text-tile placeholders shown until press images + dates arrive.
+    </p>
+  )}
+  <ul class="press-gallery__grid" role="list">
+    {items.map((item) => (
+      <li class="press-gallery__tile">
+        <a
+          href={item.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${item.outlet ?? 'Press'} — “${item.headline}” (opens in new tab)`}
+        >
+          {item.image ? (
+            <img src={item.image} alt={`${item.outlet ?? 'Press'} — ${item.headline}`} loading="lazy" decoding="async" />
+          ) : (
+            <div class="press-gallery__text-tile">
+              <span class="press-gallery__outlet">{item.outlet ?? 'Press'}</span>
+              <span class="press-gallery__headline">{item.headline}</span>
+            </div>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .press-gallery__note {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1px dashed var(--color-muted);
+    border-radius: var(--radius-md);
+  }
+
+  .press-gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 640px) {
+    .press-gallery__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .press-gallery__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .press-gallery__tile a {
+    display: block;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-surface);
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .press-gallery__tile a:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .press-gallery__tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .press-gallery__text-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-2);
+    height: 100%;
+    padding: var(--space-4);
+    color: var(--color-ink);
+  }
+  .press-gallery__outlet {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+  .press-gallery__headline {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: 1.3;
+    color: var(--color-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .press-gallery__tile a {
+      transition: none;
+    }
+    .press-gallery__tile a:hover {
+      transform: none;
+    }
+  }
+</style>

@@ -1,0 +1,114 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+type ButtonSize = 'md' | 'lg';
+
+interface BaseProps {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  class?: string;
+}
+
+type Props =
+  | (BaseProps & HTMLAttributes<'a'> & { href: string })
+  | (BaseProps & HTMLAttributes<'button'> & { href?: undefined });
+
+const { variant = 'primary', size = 'md', class: className = '', ...rest } = Astro.props;
+const classList = ['btn', `btn--${variant}`, `btn--${size}`, className].filter(Boolean).join(' ');
+const isLink = 'href' in rest && rest.href;
+---
+
+{isLink ? (
+  <a class={classList} {...rest as HTMLAttributes<'a'>}>
+    <slot />
+  </a>
+) : (
+  <button class={classList} type={(rest as HTMLAttributes<'button'>).type ?? 'button'} {...rest as HTMLAttributes<'button'>}>
+    <slot />
+  </button>
+)}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-base);
+    line-height: 1;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition:
+      background-color var(--motion-fast) var(--ease-out),
+      color var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out),
+      transform var(--motion-fast) var(--ease-out);
+    will-change: transform;
+  }
+
+  .btn--lg {
+    min-height: 52px;
+    padding: var(--space-4) var(--space-8);
+    font-size: var(--text-lg);
+  }
+
+  /* Primary — Orange fill with ink text (AA-safe contrast at all sizes) */
+  .btn--primary {
+    background: var(--color-cta-bg);
+    color: var(--color-ink);
+    border-color: var(--color-cta-bg);
+  }
+  .btn--primary:hover {
+    background: var(--color-orange-text);
+    border-color: var(--color-orange-text);
+    color: var(--color-canvas);
+  }
+  .btn--primary:active {
+    transform: translateY(1px);
+  }
+
+  /* Secondary — ink outline, transparent */
+  .btn--secondary {
+    background: transparent;
+    color: var(--color-ink);
+    border-color: var(--color-ink);
+  }
+  .btn--secondary:hover {
+    background: var(--color-ink);
+    color: var(--color-canvas);
+  }
+
+  /* Ghost — text only, muted border on hover */
+  .btn--ghost {
+    background: transparent;
+    color: var(--color-ink);
+    border-color: transparent;
+  }
+  .btn--ghost:hover {
+    border-color: var(--color-border);
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition: none;
+    }
+    .btn--primary:active {
+      transform: none;
+    }
+  }
+</style>

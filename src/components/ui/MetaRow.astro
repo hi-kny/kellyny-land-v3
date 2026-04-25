@@ -1,0 +1,58 @@
+---
+interface Props {
+  date?: string | Date;
+  readingTime?: string | number;
+  category?: string;
+  class?: string;
+}
+
+const { date, readingTime, category, class: className = '' } = Astro.props;
+const classList = ['metarow', className].filter(Boolean).join(' ');
+
+const formattedDate =
+  date instanceof Date
+    ? date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : date;
+
+const iso = date instanceof Date ? date.toISOString() : date;
+
+const readingTimeText =
+  typeof readingTime === 'number' ? `${readingTime} min read` : readingTime;
+
+const items = [
+  formattedDate && { key: 'date', value: formattedDate, iso },
+  readingTimeText && { key: 'time', value: readingTimeText },
+  category && { key: 'cat', value: category },
+].filter(Boolean) as Array<{ key: string; value: string; iso?: string }>;
+---
+
+<div class={classList}>
+  {items.map((item, i) => (
+    <>
+      {item.key === 'date' ? (
+        <time datetime={item.iso}>{item.value}</time>
+      ) : (
+        <span>{item.value}</span>
+      )}
+      {i < items.length - 1 && <span class="metarow__sep" aria-hidden="true">·</span>}
+    </>
+  ))}
+</div>
+
+<style>
+  .metarow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .metarow__sep {
+    color: var(--color-muted);
+    opacity: 0.6;
+  }
+</style>

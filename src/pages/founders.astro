@@ -1,0 +1,308 @@
+---
+import AnchoredLayout from '../layouts/AnchoredLayout.astro';
+import Anchor from '../components/ui/Anchor.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import Card from '../components/ui/Card.astro';
+import Button from '../components/ui/Button.astro';
+import { dealFlow } from '../data/deal-flow.ts';
+import { advisoryCompanies } from '../data/advisors.ts';
+
+const sections = [
+  { id: 'deal-flow',            label: 'Deal flow' },
+  { id: 'backed-by-the-best',   label: 'Backed by the best' },
+  { id: 'advisory-board-angel', label: 'Advisory & angel' },
+  { id: 'eir-eiw-techstars',    label: 'EIR / EIW / Techstars' },
+  { id: 'advisor-fast',         label: 'Advisor.Fast' },
+  { id: 'warm-intros',          label: 'Warm intros' },
+  { id: 'axis-of-curiosity',    label: 'Axis of curiosity' },
+];
+
+const description = 'How Kelly helps founders — 110+ backed, advised, or sourced across consumer tech, AI, robotics, fintech, ecommerce, and health.';
+
+// Sort dealFlow alphabetically (accent-insensitive)
+const sortedDealFlow = [...dealFlow].sort((a, b) =>
+  a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }),
+);
+---
+
+<AnchoredLayout title="Founders — Kelly Nyland" description={description} sections={sections}>
+  <!-- Hero -->
+  <header class="fo-hero">
+    <h1 class="fo-hero__title">How I help founders.</h1>
+    <p class="fo-hero__lead">
+      A selection of early-stage companies I've backed, advised, or sourced across consumer tech, AI,
+      robotics, fintech, ecommerce, and health. If you're building in one of these spaces, there's a
+      real chance we should talk.
+    </p>
+  </header>
+
+  <!-- #deal-flow -->
+  <Anchor id="deal-flow" class="fo-section">
+    <Eyebrow>Deal flow</Eyebrow>
+    <h2 class="fo-h2">Deal flow</h2>
+    <p class="fo-subtitle">
+      {sortedDealFlow.length} companies, alphabetical. Tagged items show my specific role.
+    </p>
+    <ul class="deal-flow" role="list">
+      {sortedDealFlow.map((item) => (
+        <li class="deal-flow__item">
+          {item.href ? (
+            <a href={item.href} target="_blank" rel="noopener noreferrer">{item.title}</a>
+          ) : (
+            <span>{item.title}</span>
+          )}
+          {item.tag && <span class="deal-flow__tag">{item.tag}</span>}
+        </li>
+      ))}
+    </ul>
+  </Anchor>
+
+  <!-- #backed-by-the-best -->
+  <Anchor id="backed-by-the-best" class="fo-section">
+    <Eyebrow>Backed by the best</Eyebrow>
+    <h2 class="fo-h2">Backed by the best</h2>
+    <p class="fo-subtitle">Individual investor + institutional partners who have backed Kelly's companies.</p>
+    <div class="logo-grid logo-grid--placeholder">
+      {Array.from({ length: 12 }).map(() => <div class="logo-grid__slot" aria-hidden="true">Logo</div>)}
+    </div>
+    <p class="placeholder-note">Individual investor logos arriving — placeholders shown.</p>
+    {/* TODO KELLY: backed-by-the-best individual investor logos */}
+  </Anchor>
+
+  <!-- #advisory-board-angel -->
+  <Anchor id="advisory-board-angel" class="fo-section">
+    <Eyebrow>Advisory & angel</Eyebrow>
+    <h2 class="fo-h2">Advisory board & angel positions</h2>
+    <div class="advisor-grid">
+      {advisoryCompanies.map((a) => (
+        <Card>
+          <div class="advisor-card">
+            <img src={a.logo} alt={`${a.name} logo`} width="120" height="48" loading="lazy" decoding="async" />
+            <p class="advisor-card__name">{a.name}</p>
+            <p class="advisor-card__role">{a.role}</p>
+            <p class="advisor-card__tagline">{a.tagline}</p>
+          </div>
+        </Card>
+      ))}
+    </div>
+  </Anchor>
+
+  <!-- Four placeholder anchors -->
+  <Anchor id="eir-eiw-techstars" class="fo-section">
+    <Eyebrow>EIR / EIW / Techstars</Eyebrow>
+    <h2 class="fo-h2">EIR, EIW, and Techstars</h2>
+    <p class="placeholder-note">Content coming — Kelly's EIR / EIW roles and Techstars work.</p>
+    {/* TODO KELLY: eir-eiw-techstars content */}
+  </Anchor>
+
+  <Anchor id="advisor-fast" class="fo-section">
+    <Eyebrow>Advisor.Fast</Eyebrow>
+    <h2 class="fo-h2">Advisor.Fast</h2>
+    <p class="placeholder-note">Content coming — Kelly's Advisor.Fast program details.</p>
+    {/* TODO KELLY: advisor-fast content */}
+  </Anchor>
+
+  <Anchor id="warm-intros" class="fo-section">
+    <Eyebrow>Warm intros</Eyebrow>
+    <h2 class="fo-h2">Warm intros</h2>
+    <p class="placeholder-note">Content coming — how to ask for a warm intro + criteria.</p>
+    {/* TODO KELLY: warm-intros content */}
+  </Anchor>
+
+  <Anchor id="axis-of-curiosity" class="fo-section">
+    <Eyebrow>Axis of curiosity</Eyebrow>
+    <h2 class="fo-h2">Axis of curiosity</h2>
+    <p class="placeholder-note">Content coming — what Kelly's looking at right now.</p>
+    {/* TODO KELLY: axis-of-curiosity content */}
+  </Anchor>
+
+  <!-- Bottom CTA -->
+  <section class="fo-cta">
+    <p class="fo-cta__copy">Want help fundraising? Take the course.</p>
+    <Button href="/thoughts/fundraising-course" variant="primary" size="lg">Take the course →</Button>
+  </section>
+</AnchoredLayout>
+
+<style>
+  .fo-hero {
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+    margin-bottom: var(--space-12);
+  }
+  .fo-hero__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-4xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  .fo-hero__lead {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+  }
+
+  .fo-section {
+    padding-block: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .fo-section:last-of-type {
+    border-bottom: none;
+  }
+
+  .fo-h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  .fo-subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-ink);
+    margin-bottom: var(--space-6);
+    max-width: var(--width-prose);
+  }
+
+  /* Deal flow list */
+  .deal-flow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+  @media (min-width: 640px) {
+    .deal-flow { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .deal-flow { grid-template-columns: repeat(3, 1fr); }
+  }
+  .deal-flow__item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    padding-block: var(--space-1);
+  }
+  .deal-flow__item a {
+    color: var(--color-ink);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition:
+      color var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out);
+  }
+  .deal-flow__item a:hover {
+    color: var(--color-orange-text);
+    border-bottom-color: var(--color-orange-text);
+  }
+  .deal-flow__tag {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-orange-text);
+  }
+
+  /* Placeholder / logo grid */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+  @media (min-width: 640px) {
+    .logo-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .logo-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .logo-grid__slot {
+    aspect-ratio: 3 / 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+  }
+
+  .placeholder-note {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    padding: var(--space-3) var(--space-4);
+    border: 1px dashed var(--color-muted);
+    border-radius: var(--radius-md);
+    display: inline-block;
+  }
+
+  /* Advisor grid */
+  .advisor-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 640px) {
+    .advisor-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .advisor-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .advisor-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .advisor-card img {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: var(--space-2);
+  }
+  .advisor-card__name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-lg);
+    color: var(--color-ink);
+  }
+  .advisor-card__role {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-orange-text);
+  }
+  .advisor-card__tagline {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+  }
+
+  /* Bottom CTA */
+  .fo-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-block: var(--space-16);
+    border-top: 1px solid var(--color-rule);
+    margin-top: var(--space-8);
+  }
+  .fo-cta__copy {
+    font-family: var(--font-body);
+    font-size: var(--text-2xl);
+    line-height: var(--leading-snug);
+    color: var(--color-ink);
+  }
+</style>

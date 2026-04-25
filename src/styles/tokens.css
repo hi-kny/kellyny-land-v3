@@ -1,0 +1,60 @@
+:root {
+  /* ─── Anthropic main colors ─────────────────────── */
+  --color-canvas:  #faf9f5;
+  --color-surface: #e8e6dc;
+  --color-muted:   #b0aea5;
+  --color-ink:     #141413;
+
+  /* ─── Anthropic accent colors ─────────────────── */
+  --color-orange:  #d97757;
+  --color-blue:    #6a9bcc;
+  --color-green:   #788c5d;
+
+  /* AA-compliant orange for inline body links + eyebrows.
+     Darkened from the plan's #b95a3c (4.1:1) to #a94e30 (~5.2:1)
+     so Lighthouse strict AA passes on normal-size text. */
+  --color-orange-text: #a94e30;
+
+  /* Semantic aliases */
+  --color-link:        var(--color-orange-text);
+  --color-link-hover:  var(--color-orange);
+  --color-cta-bg:      var(--color-orange);
+  --color-cta-text:    var(--color-canvas);
+  --color-focus-ring:  var(--color-orange);
+  --color-border:      var(--color-muted);
+  --color-rule:        var(--color-surface);
+
+  /* ─── Type ──────────────────────────────────────── */
+  --font-display: "Poppins", Arial, system-ui, sans-serif;
+  --font-body:    "Lora", Georgia, "Times New Roman", serif;
+
+  --text-xs:   0.75rem;     --text-sm:   0.875rem;
+  --text-base: 1.0625rem;   --text-lg:   1.25rem;
+  --text-xl:   1.5625rem;   --text-2xl:  1.95rem;
+  --text-3xl:  2.44rem;     --text-4xl:  3.05rem;
+  --text-5xl:  3.815rem;
+
+  --leading-tight: 1.15;  --leading-snug: 1.35;  --leading-body: 1.6;
+
+  /* ─── Spacing (4px base) ────────────────────────── */
+  --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+  --space-6:1.5rem;  --space-8:2rem;   --space-12:3rem;   --space-16:4rem;
+  --space-24:6rem;   --space-32:8rem;
+
+  /* ─── Layout widths ─────────────────────────────── */
+  --width-prose:   38rem;
+  --width-content: 64rem;
+  --width-wide:    80rem;
+
+  /* ─── Radius / shadow / motion ──────────────────── */
+  --radius-sm: 4px;  --radius-md: 8px;  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px  rgba(20,20,19,0.06);
+  --shadow-md: 0 4px 12px rgba(20,20,19,0.08);
+  --motion-fast: 150ms;  --motion-base: 240ms;  --motion-slow: 480ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* ─── Nav height for scroll-margin offset ─────── */
+  --nav-height: 88px;
+}
+
+/* No dark mode in v1 (Kelly's call). Light canvas only. */

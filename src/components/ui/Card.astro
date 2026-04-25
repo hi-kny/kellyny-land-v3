@@ -1,0 +1,72 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type CardVariant = 'default' | 'feature' | 'quote';
+
+interface BaseProps {
+  variant?: CardVariant;
+  class?: string;
+}
+
+type Props =
+  | (BaseProps & HTMLAttributes<'a'> & { href: string })
+  | (BaseProps & HTMLAttributes<'div'> & { href?: undefined });
+
+const { variant = 'default', class: className = '', ...rest } = Astro.props;
+const classList = ['card', `card--${variant}`, className].filter(Boolean).join(' ');
+const isLink = 'href' in rest && rest.href;
+---
+
+{isLink ? (
+  <a class={classList} {...rest as HTMLAttributes<'a'>}>
+    <slot />
+  </a>
+) : (
+  <div class={classList} {...rest as HTMLAttributes<'div'>}>
+    <slot />
+  </div>
+)}
+
+<style>
+  .card {
+    display: block;
+    padding: var(--space-6);
+    border-radius: var(--radius-md);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-rule);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      border-color var(--motion-fast) var(--ease-out),
+      box-shadow var(--motion-fast) var(--ease-out),
+      transform var(--motion-fast) var(--ease-out);
+  }
+
+  a.card:hover,
+  a.card:focus-within {
+    border-color: var(--color-orange);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card--feature {
+    background: var(--color-surface);
+    border-color: transparent;
+    padding: var(--space-8);
+  }
+
+  .card--quote {
+    background: var(--color-canvas);
+    border-left: 3px solid var(--color-orange);
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 0;
+    padding-left: var(--space-6);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      transition: none;
+    }
+  }
+</style>

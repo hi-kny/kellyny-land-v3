@@ -1,8 +1,18 @@
 ---
+import type { ImageMetadata } from 'astro'
+
 interface GalleryImage {
+  /** Resolved URL string (used for both thumbnail src and lightbox full-res). */
   src: string
   alt: string
   caption?: string
+  /** Optional pre-resolved metadata — kept for the API surface, not currently
+      used to generate responsive variants because Astro's <Image> can't
+      statically analyze dynamically-iterated ImageMetadata props. */
+  meta?: ImageMetadata
+  /** Intrinsic dimensions to prevent CLS when known. */
+  width?: number
+  height?: number
 }
 
 interface Props {
@@ -31,44 +41,47 @@ const galleryId = `gallery-${Math.random().toString(36).slice(2, 8)}`
   id={galleryId}
   style={`--desktop-cols: ${desktopColumns}; --mobile-cols: ${mobileColumns}; --gap: ${gap};`}
 >
-  {images.map((image, i) => (
-    <figure class="gallery-item">
-      {lightbox ? (
-        <button
-          class="gallery-trigger"
-          data-lb={galleryId}
-          data-index={i}
-          aria-label={`View ${image.alt} full size`}
-        >
-          <img
-            src={image.src}
-            alt={image.alt}
-            class="gallery-image"
-            loading="lazy"
-            decoding="async"
-            style={aspectRatio ? `aspect-ratio: ${aspectRatio}; object-fit: cover;` : ''}
-          />
-        </button>
-      ) : (
-        <img
-          src={image.src}
-          alt={image.alt}
-          class="gallery-image"
-          loading="lazy"
-          decoding="async"
-          style={aspectRatio ? `aspect-ratio: ${aspectRatio}; object-fit: cover;` : ''}
-        />
-      )}
-      {image.caption && <figcaption>{image.caption}</figcaption>}
-    </figure>
-  ))}
+  {images.map((image, i) => {
+    const thumbStyle = aspectRatio ? `aspect-ratio: ${aspectRatio}; object-fit: cover;` : ''
+    const w = image.width ?? image.meta?.width
+    const h = image.height ?? image.meta?.height
+    const thumb = (
+      <img
+        src={image.src}
+        alt={image.alt}
+        class="gallery-image"
+        loading="lazy"
+        decoding="async"
+        width={w}
+        height={h}
+        style={thumbStyle}
+      />
+    )
+    return (
+      <figure class="gallery-item">
+        {lightbox ? (
+          <button
+            class="gallery-trigger"
+            data-lb={galleryId}
+            data-index={i}
+            aria-label={`View ${image.alt} full size`}
+          >
+            {thumb}
+          </button>
+        ) : (
+          thumb
+        )}
+        {image.caption && <figcaption>{image.caption}</figcaption>}
+      </figure>
+    )
+  })}
 </div>
 
 {lightbox && (
   <div
     class="gallery-lightbox"
     id={`lightbox-${galleryId}`}
-    aria-hidden="true"
+    inert
     role="dialog"
     aria-label="Image gallery"
   >
@@ -97,13 +110,15 @@ const galleryId = `gallery-${Math.random().toString(36).slice(2, 8)}`
         lbImg.src = images[index].src
         lbImg.alt = images[index].alt
         lbCaption.textContent = images[index].caption || images[index].alt
-        lightbox.setAttribute('aria-hidden', 'false')
+        lightbox.removeAttribute('inert')
+        lightbox.setAttribute('data-open', 'true')
         document.body.style.overflow = 'hidden'
         lightbox.querySelector('.lb-close')?.focus()
       }
 
       function close() {
-        lightbox.setAttribute('aria-hidden', 'true')
+        lightbox.setAttribute('inert', '')
+        lightbox.removeAttribute('data-open')
         document.body.style.overflow = ''
         const trigger = document.querySelector(`[data-lb="${galleryId}"][data-index="${currentIndex}"]`)
         trigger?.focus()
@@ -130,7 +145,7 @@ const galleryId = `gallery-${Math.random().toString(36).slice(2, 8)}`
       })
 
       document.addEventListener('keydown', (e) => {
-        if (lightbox.getAttribute('aria-hidden') === 'true') return
+        if (!lightbox.hasAttribute('data-open')) return
         if (e.key === 'Escape') close()
         if (e.key === 'ArrowLeft') navigate(-1)
         if (e.key === 'ArrowRight') navigate(1)
@@ -193,7 +208,7 @@ const galleryId = `gallery-${Math.random().toString(36).slice(2, 8)}`
     transition: opacity var(--motion-base) var(--ease-out);
   }
 
-  .gallery-lightbox[aria-hidden='false'] {
+  .gallery-lightbox[data-open='true'] {
     opacity: 1;
     pointer-events: auto;
   }

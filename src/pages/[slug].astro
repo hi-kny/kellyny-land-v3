@@ -1,0 +1,316 @@
+---
+import ProductLayout from '../layouts/ProductLayout.astro';
+import CaseStudyCover from '../components/patterns/CaseStudyCover.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import ImageGallery from '../components/embeds/ImageGallery.astro';
+import FigmaEmbed from '../components/embeds/FigmaEmbed.astro';
+import YouTubeEmbed from '../components/embeds/YouTubeEmbed.astro';
+import { projects, getNeighborSlugs } from '../data/portfolioData.ts';
+
+export async function getStaticPaths() {
+  return projects.map((p) => ({
+    params: { slug: p.slug },
+    props: { project: p },
+  }));
+}
+
+const { project } = Astro.props;
+const { prev, next } = getNeighborSlugs(project.slug);
+
+// Resolve sibling titles for prev/next labels
+const slugToTitle = new Map(projects.map((p) => [p.slug, p.title]));
+const prevTitle = prev ? slugToTitle.get(prev) ?? prev : null;
+const nextTitle = next ? slugToTitle.get(next) ?? next : null;
+
+/**
+ * Normalize a gallery image into the {src, alt, width, height} shape
+ * ImageGallery expects.
+ *
+ * For raw URLs (Squarespace CDN, etc.) we pass through unchanged.
+ *
+ * For ImageMetadata we use the `.src` which is the full-resolution optimized
+ * image Astro emits via `import.meta.glob`. We avoid `getImage()` in this
+ * dynamic-route page because Astro 6's asset pipeline does not reliably emit
+ * the variants that getImage() returns URLs for — variant 404s in production
+ * builds. Plain `.src` always exists. Width/height attributes prevent CLS.
+ *
+ * Pages can override per-tile size by providing `heroImage` on the project,
+ * which CaseStudyCover renders eagerly for LCP.
+ */
+function toGalleryImage(img: any, fallbackAlt: string) {
+  if (typeof img === 'string') {
+    return { src: img, alt: fallbackAlt };
+  }
+  return {
+    src: img.src,
+    alt: fallbackAlt,
+    width: img.width,
+    height: img.height,
+  };
+}
+
+const heroImage = project.heroImage ?? project.images?.[0];
+const description =
+  project.description?.[0] ?? project.tagline ?? `${project.title} — case study by Kelly Nyland.`;
+const ogImageString =
+  typeof heroImage === 'string' ? heroImage : (heroImage as any)?.src;
+
+// Filter out broken/empty sections (some entries have empty sections array)
+const sections = (project.sections ?? []).filter(
+  (s: any) => s && (s.heading || s.label) && (s.description?.length || s.notes?.length || s.images?.length || s.figmaEmbed),
+);
+
+// Section galleries: keep all images Kelly curated.
+const sectionsWithImages = sections.map((section: any) => ({
+  ...section,
+  galleryImages: section.images?.length
+    ? section.images.map((img: any, i: number) =>
+        toGalleryImage(img, `${project.title} — ${section.label} image ${i + 1}`),
+      )
+    : null,
+}));
+
+// Fallback gallery (pages without sections): cap at 6 images so the page
+// stays light. Without responsive variants, each thumbnail is the
+// full-size optimized webp from Sharp's pre-processing — typically 100-300KB
+// each, 6 of which is small enough to clear the perf budget under throttling.
+const FALLBACK_CAP = 6;
+const fallbackImages =
+  sections.length === 0 && project.images && project.images.length > 1
+    ? project.images
+        .slice(1, 1 + FALLBACK_CAP)
+        .map((img: any, i: number) =>
+          toGalleryImage(img, `${project.title} — image ${i + 1}`),
+        )
+    : null;
+---
+
+<ProductLayout
+  title={`${project.title} — Kelly Nyland`}
+  description={description}
+  ogImage={ogImageString}
+>
+  <CaseStudyCover
+    title={project.title}
+    category={project.category}
+    status={project.status}
+    date={project.date}
+    tagline={project.tagline}
+    heroImage={heroImage}
+  />
+
+  {project.description && project.description.length > 0 && (
+    <div class="prose">
+      {project.description.map((p: string) => <p>{p}</p>)}
+    </div>
+  )}
+
+  {sectionsWithImages.map((section: any) => (
+    <section class="cs-section">
+      <Eyebrow>{section.label}</Eyebrow>
+      {section.heading && <h2 class="cs-h2">{section.heading}</h2>}
+      {section.description?.map((d: string) => <p class="cs-body">{d}</p>)}
+      {section.notes && section.notes.length > 0 && (
+        <ul class="cs-notes">
+          {section.notes.map((n: string) => <li>{n}</li>)}
+        </ul>
+      )}
+      {section.figmaEmbed && (
+        <div class="cs-embed">
+          <FigmaEmbed url={section.figmaEmbed} title={`${project.title} — ${section.label} prototype`} />
+        </div>
+      )}
+      {section.galleryImages && section.galleryImages.length > 0 && (
+        <div class="cs-gallery">
+          <ImageGallery
+            images={section.galleryImages}
+            aspectRatio={project.galleryAspectRatio ?? '4/3'}
+          />
+        </div>
+      )}
+    </section>
+  ))}
+
+  {/* Fallback: if no sections, render the top-level images[] as a gallery,
+      capped at 18 thumbnails so heavy archives (e.g. snapbots' 79 images)
+      don't blow the perf budget. Each thumb is pre-processed by getImage()
+      into a 640w webp at build time. */}
+  {fallbackImages && fallbackImages.length > 0 && (
+    <div class="cs-gallery">
+      <ImageGallery
+        images={fallbackImages}
+        aspectRatio={project.galleryAspectRatio ?? '4/3'}
+      />
+      {project.images.length > 1 + FALLBACK_CAP && (
+        <p class="cs-more-note">
+          Showing {FALLBACK_CAP} of {project.images.length - 1} images from this project.
+        </p>
+      )}
+    </div>
+  )}
+
+  {project.videos && project.videos.length > 0 && (
+    <section class="cs-videos">
+      <Eyebrow>Video</Eyebrow>
+      <h2 class="cs-h2">Watch</h2>
+      <div class="cs-video-row">
+        {project.videos.map((v: any) => (
+          <YouTubeEmbed
+            videoId={v.type === 'playlist' ? undefined : v.id}
+            playlistId={v.type === 'playlist' ? v.id : undefined}
+            title={v.title ?? `${project.title} — ${v.id}`}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <nav class="cs-nav" aria-label="Product navigation">
+    {prev && (
+      <a href={`/${prev}`} class="cs-nav__link cs-nav__link--prev">
+        <span class="cs-nav__direction">← Previous</span>
+        <span class="cs-nav__title">{prevTitle}</span>
+      </a>
+    )}
+    <a href="/products" class="cs-nav__index">All products</a>
+    {next && (
+      <a href={`/${next}`} class="cs-nav__link cs-nav__link--next">
+        <span class="cs-nav__direction">Next →</span>
+        <span class="cs-nav__title">{nextTitle}</span>
+      </a>
+    )}
+  </nav>
+</ProductLayout>
+
+<style>
+  .prose {
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-12);
+  }
+  .prose p {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+
+  .cs-section {
+    padding-block: var(--space-12);
+    border-top: 1px solid var(--color-rule);
+  }
+  .cs-section:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .cs-h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-6);
+  }
+  .cs-body {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-4);
+  }
+  .cs-notes {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    padding-left: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .cs-notes li {
+    list-style: disc;
+    margin-left: var(--space-4);
+    margin-bottom: var(--space-2);
+  }
+  .cs-gallery {
+    margin-block: var(--space-6);
+  }
+  .cs-more-note {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    margin-top: var(--space-4);
+    opacity: 0.75;
+  }
+  .cs-embed {
+    margin-block: var(--space-6);
+  }
+  .cs-videos {
+    padding-block: var(--space-12);
+    border-top: 1px solid var(--color-rule);
+  }
+  .cs-video-row {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .cs-nav {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-12);
+    border-top: 1px solid var(--color-rule);
+    margin-top: var(--space-8);
+  }
+  @media (min-width: 768px) {
+    .cs-nav {
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+    }
+  }
+  .cs-nav__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    color: var(--color-ink);
+    text-decoration: none;
+    padding: var(--space-3) 0;
+    transition: color var(--motion-fast) var(--ease-out);
+  }
+  .cs-nav__link:hover {
+    color: var(--color-orange-text);
+  }
+  .cs-nav__link--next {
+    text-align: right;
+  }
+  .cs-nav__direction {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-orange-text);
+  }
+  .cs-nav__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-lg);
+  }
+  .cs-nav__index {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-align: center;
+    padding: var(--space-3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cs-nav__link {
+      transition: none;
+    }
+  }
+</style>

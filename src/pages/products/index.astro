@@ -1,0 +1,253 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Nav from '../../components/patterns/Nav.astro';
+import Footer from '../../components/patterns/Footer.astro';
+import Section from '../../components/ui/Section.astro';
+import Card from '../../components/ui/Card.astro';
+import ProductGalleryGrid from '../../components/patterns/ProductGalleryGrid.astro';
+import { projects } from '../../data/portfolioData.ts';
+
+// Display order per Kelly's rev 4 list (PLAN §4.1 / §6.4).
+const displayOrder = [
+  'oddkin',
+  'atlas',
+  'warmup',
+  'dutch',
+  'kookie',
+  'spectacles',
+  'snapbots',
+  'shopping-app',
+  'zero-party-data',
+  'minishop',
+  'textshop',
+  'petalfox',
+  'pop-up',
+  'shopping-qr',
+  'bb8',
+  'sprk',
+  'ollie',
+  'ar-drone',
+  'roli',
+  'zik',
+  'zikmu',
+  'soundwall',
+  'retail',
+];
+
+// Tag map for filter chips. Each slug can carry multiple tags.
+// Era tags reflect Kelly's career chapters; topic tags map to PLAN's filter chips.
+const tagMap: Record<string, string[]> = {
+  'oddkin':           ['Consumer AI'],
+  'atlas':            ['Consumer AI'],
+  'warmup':           ['Consumer AI'],
+  'dutch':            ['Fintech'],
+  'kookie':           ['Consumer AI', 'Retail'],
+  'spectacles':       ['Hardware', 'Snap-era'],
+  'snapbots':         ['Hardware', 'Snap-era'],
+  'shopping-app':     ['Retail'],
+  'zero-party-data':  ['Retail'],
+  'minishop':         ['Retail'],
+  'textshop':         ['Retail'],
+  'petalfox':         ['Retail'],
+  'pop-up':           ['Retail', 'Snap-era'],
+  'shopping-qr':      ['Retail'],
+  'bb8':              ['Hardware', 'Robotics', 'Sphero-era'],
+  'sprk':             ['Hardware', 'Robotics', 'Sphero-era'],
+  'ollie':            ['Hardware', 'Robotics', 'Sphero-era'],
+  'ar-drone':         ['Hardware', 'Robotics', 'Parrot-era'],
+  'roli':             ['Hardware'],
+  'zik':              ['Hardware', 'Parrot-era'],
+  'zikmu':            ['Hardware', 'Parrot-era'],
+  'soundwall':        ['Hardware'],
+  'retail':           ['Retail'],
+};
+
+const filterChips = [
+  'All',
+  'Consumer AI',
+  'Hardware',
+  'Fintech',
+  'Robotics',
+  'Retail',
+  'Snap-era',
+  'Sphero-era',
+  'Parrot-era',
+];
+
+const tiles = projects
+  .filter((p) => displayOrder.includes(p.slug))
+  .map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    category: p.category,
+    heroImage: p.heroImage ?? p.images[0],
+    tags: tagMap[p.slug] ?? [],
+    order: displayOrder.indexOf(p.slug),
+  }));
+
+const description = '23 products across consumer AI, hardware, robotics, fintech, and retail.';
+---
+
+<BaseLayout title="Products — Kelly Nyland" description={description}>
+  <Nav slot="nav" />
+  <Section variant="wide" padded>
+    <header class="prod-hero">
+      <h1 class="prod-hero__title">Products I've built.</h1>
+      <p class="prod-hero__lead">{description}</p>
+
+      <div class="filter-chips" role="group" aria-label="Filter by category">
+        {filterChips.map((chip, i) => (
+          <button
+            type="button"
+            class="filter-chip"
+            data-filter={chip}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            {chip}
+          </button>
+        ))}
+      </div>
+    </header>
+
+    <ProductGalleryGrid tiles={tiles} />
+
+    <Card class="yt-cta" href="https://www.youtube.com/@kellynyland">
+      <div class="yt-cta__inner">
+        <div>
+          <p class="yt-cta__eyebrow">More on YouTube</p>
+          <p class="yt-cta__title">Visit my YouTube channel</p>
+          <p class="yt-cta__sub">Launch films, behind-the-scenes, conference talks.</p>
+        </div>
+        <span class="yt-cta__arrow" aria-hidden="true">→</span>
+      </div>
+    </Card>
+  </Section>
+  <Footer slot="footer" />
+</BaseLayout>
+
+<script>
+  // Filter chips — toggle .is-hidden on tiles based on selected chip.
+  const chips = document.querySelectorAll<HTMLButtonElement>('.filter-chip');
+  const tiles = document.querySelectorAll<HTMLElement>('.pgg__item');
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const selected = chip.dataset.filter ?? 'All';
+      chips.forEach((c) =>
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'),
+      );
+      tiles.forEach((tile) => {
+        const tileTags = (tile.dataset.tags ?? '').split(/\s+/).filter(Boolean);
+        const visible =
+          selected === 'All' || tileTags.includes(selected);
+        tile.classList.toggle('is-hidden', !visible);
+      });
+    });
+  });
+</script>
+
+<style>
+  .prod-hero {
+    padding-bottom: var(--space-12);
+    margin-bottom: var(--space-12);
+  }
+  .prod-hero__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-4xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  .prod-hero__lead {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-8);
+  }
+
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .filter-chip {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    min-height: 36px;
+    transition:
+      background-color var(--motion-fast) var(--ease-out),
+      color var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out);
+  }
+  .filter-chip:hover {
+    border-color: var(--color-orange-text);
+    color: var(--color-orange-text);
+  }
+  .filter-chip[aria-pressed='true'] {
+    background: var(--color-ink);
+    color: var(--color-canvas);
+    border-color: var(--color-ink);
+  }
+
+  .yt-cta {
+    margin-top: var(--space-16);
+    background: var(--color-ink);
+    color: var(--color-canvas);
+    border: none;
+  }
+  .yt-cta:hover {
+    border-color: transparent;
+  }
+  .yt-cta__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+  .yt-cta__eyebrow {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-orange);
+    margin-bottom: var(--space-2);
+  }
+  .yt-cta__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    color: var(--color-canvas);
+    margin-bottom: var(--space-2);
+  }
+  .yt-cta__sub {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-canvas);
+    opacity: 0.85;
+  }
+  .yt-cta__arrow {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    color: var(--color-orange);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .filter-chip {
+      transition: none;
+    }
+  }
+</style>

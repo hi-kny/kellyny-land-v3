@@ -1,0 +1,138 @@
+---
+interface Tile {
+  slug: string;
+  title: string;
+  category: string;
+  heroImage: any;
+  tags: string[];
+  order: number;
+}
+
+interface Props {
+  tiles: Tile[];
+}
+
+const { tiles } = Astro.props;
+const sorted = [...tiles].sort((a, b) => a.order - b.order);
+
+// Resolve src/width/height from either a raw URL or an ImageMetadata.
+// We use the base `.src` rather than <Image> with widths to avoid the
+// Astro 6 quirk where dynamic <Image src=...> variants 404 in dynamic-route
+// pages (variant URLs the renderer emits don't always match what the asset
+// pipeline writes to disk).
+const resolved = sorted.map((t) => {
+  const isString = typeof t.heroImage === 'string';
+  return {
+    ...t,
+    imgSrc: isString ? t.heroImage : (t.heroImage as any).src,
+    imgWidth: isString ? undefined : (t.heroImage as any).width,
+    imgHeight: isString ? undefined : (t.heroImage as any).height,
+  };
+});
+---
+
+<ul class="pgg" role="list">
+  {resolved.map((t) => (
+    <li class="pgg__item" data-tags={t.tags.join(' ')} data-slug={t.slug}>
+      <a href={`/${t.slug}`} class="pgg__tile">
+        <div class="pgg__image">
+          <img
+            src={t.imgSrc}
+            alt={`${t.title} hero`}
+            loading="lazy"
+            decoding="async"
+            width={t.imgWidth}
+            height={t.imgHeight}
+          />
+          <div class="pgg__overlay" aria-hidden="true"></div>
+          <div class="pgg__title-wrap">
+            <h3 class="pgg__title">{t.title}</h3>
+          </div>
+        </div>
+        <p class="pgg__category">{t.category}</p>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .pgg {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  @media (min-width: 640px) {
+    .pgg { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .pgg { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .pgg__item.is-hidden {
+    display: none;
+  }
+
+  .pgg__tile {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .pgg__image {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .pgg__tile:hover .pgg__image {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .pgg__image :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .pgg__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(20, 20, 19, 0.65), rgba(20, 20, 19, 0.0) 55%);
+    pointer-events: none;
+  }
+
+  .pgg__title-wrap {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: var(--space-4) var(--space-6);
+  }
+  .pgg__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    color: var(--color-canvas);
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+
+  .pgg__category {
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pgg__image,
+    .pgg__tile:hover .pgg__image {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>

@@ -1,0 +1,61 @@
+---
+interface Props {
+  designUrl: string
+  title?: string
+  width?: string
+  aspectRatio?: string
+}
+
+const {
+  designUrl,
+  title = 'Canva design',
+  width = '100%',
+  aspectRatio = '16/9'
+} = Astro.props
+
+// Convert Canva share URLs to embed format
+// https://www.canva.com/design/XXXX/view → https://www.canva.com/design/XXXX/view?embed
+const embedUrl = designUrl.includes('?') ? `${designUrl}&embed` : `${designUrl}?embed`
+---
+
+<div class="embed-container" style={`width: ${width}; aspect-ratio: ${aspectRatio};`}>
+  <iframe
+    src={embedUrl}
+    title={title}
+    loading="lazy"
+    allowfullscreen
+    allow="fullscreen"
+  ></iframe>
+</div>
+<p class="embed-fallback">
+  <a href={designUrl} target="_blank" rel="noopener noreferrer">View on Canva</a>
+</p>
+
+<style>
+  .embed-container {
+    position: relative;
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+  }
+
+  .embed-container iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .embed-fallback {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-top: var(--space-2);
+  }
+
+  @media print {
+    .embed-container iframe { display: none; }
+    .embed-fallback { display: block; }
+  }
+</style>

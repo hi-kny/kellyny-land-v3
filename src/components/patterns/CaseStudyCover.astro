@@ -1,0 +1,133 @@
+---
+import Tag from '../ui/Tag.astro';
+
+interface Props {
+  title: string;
+  category: string;
+  status?: string;
+  date?: string;
+  tagline?: string;
+  heroImage: any;
+  tags?: string[];
+}
+
+const { title, category, status, date, tagline, heroImage, tags = [] } = Astro.props;
+const formattedDate = date
+  ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+  : null;
+
+// Use the optimized base file (always emitted) instead of asking the asset
+// pipeline for a dynamic-width variant — variants 404 in production builds
+// when called from inside a dynamic-route page (Astro 6 quirk).
+const heroSrc =
+  typeof heroImage === 'string' ? heroImage : (heroImage as any).src;
+const heroWidth =
+  typeof heroImage === 'string' ? undefined : (heroImage as any).width;
+const heroHeight =
+  typeof heroImage === 'string' ? undefined : (heroImage as any).height;
+---
+
+<header class="csc">
+  <div class="csc__hero">
+    <img
+      src={heroSrc}
+      alt={`${title} cover`}
+      loading="eager"
+      decoding="async"
+      fetchpriority="high"
+      width={heroWidth}
+      height={heroHeight}
+    />
+  </div>
+
+  <div class="csc__meta">
+    <p class="csc__category">{category}</p>
+    <h1 class="csc__title">{title}</h1>
+    {tagline && <p class="csc__tagline">{tagline}</p>}
+    <div class="csc__meta-row">
+      {status && <span class="csc__status">{status}</span>}
+      {formattedDate && (<>
+        {status && <span aria-hidden="true">·</span>}
+        <time datetime={date}>{formattedDate}</time>
+      </>)}
+    </div>
+    {tags.length > 0 && (
+      <div class="csc__tags">
+        {tags.map((t) => <Tag color="muted">{t}</Tag>)}
+      </div>
+    )}
+  </div>
+</header>
+
+<style>
+  .csc {
+    margin-bottom: var(--space-12);
+  }
+
+  .csc__hero {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    margin-bottom: var(--space-8);
+  }
+  .csc__hero :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .csc__category {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-orange-text);
+    margin-bottom: var(--space-3);
+  }
+
+  .csc__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-5xl);
+    line-height: var(--leading-tight);
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+
+  .csc__tagline {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: var(--text-xl);
+    line-height: var(--leading-snug);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-4);
+  }
+
+  .csc__meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+
+  .csc__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  @media (max-width: 640px) {
+    .csc__title { font-size: var(--text-4xl); }
+  }
+</style>

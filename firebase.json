@@ -1,0 +1,73 @@
+{
+  "hosting": {
+    "public": "dist",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      { "source": "/", "destination": "/thoughts", "type": 301 },
+
+      { "source": "/about", "destination": "/background", "type": 301 },
+
+      { "source": "/portfolio", "destination": "/products", "type": 301 },
+      { "source": "/portfolio/:slug", "destination": "/:slug", "type": 301 },
+      { "source": "/portfolio/**", "destination": "/products", "type": 301 },
+
+      { "source": "/project-atlas", "destination": "/atlas", "type": 301 },
+
+      { "source": "/blog", "destination": "/thoughts", "type": 301 },
+      { "source": "/blog/96286637-460e-82e5-aa8d-815b2e525df8", "destination": "/thoughts/bridging-the-skill-gap-between-digital-and-physical-worlds", "type": 301 },
+      { "source": "/blog/5noo0j2vmeyhvf0u5tny61gpc6ulck", "destination": "/thoughts/knowledge-graph", "type": 301 },
+      { "source": "/blog/**", "destination": "/thoughts", "type": 301 },
+
+      { "source": "/thoughts/founder-memo", "destination": "/thoughts/bridging-the-skill-gap-between-digital-and-physical-worlds", "type": 301 },
+
+      { "source": "/services", "destination": "/hire", "type": 301 },
+      { "source": "/consult", "destination": "/hire", "type": 301 },
+      { "source": "/contact", "destination": "/hire#hire-me", "type": 301 },
+      { "source": "/investing", "destination": "/founders", "type": 301 },
+      { "source": "/newsletter", "destination": "/thoughts", "type": 301 },
+      { "source": "/speaking-press", "destination": "/background#press-mentions-list", "type": 301 },
+      { "source": "/speaking", "destination": "/background#press-mentions-list", "type": 301 },
+
+      { "source": "/fundraising-course", "destination": "/thoughts/fundraising-course", "type": 301 },
+      { "source": "/fundraising-course/:lesson", "destination": "/thoughts/fundraising-course/:lesson", "type": 301 },
+      { "source": "/fundraising-course/**", "destination": "/thoughts/fundraising-course", "type": 301 }
+    ],
+    "headers": [
+      {
+        "source": "/_astro/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "/fonts/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "**/*.@(jpg|jpeg|png|webp|avif|svg)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "**/*.@(woff|woff2)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "**",
+        "headers": [
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+          { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+        ]
+      }
+    ]
+  }
+}

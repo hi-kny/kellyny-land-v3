@@ -1,0 +1,168 @@
+---
+import AnchoredLayout from '../layouts/AnchoredLayout.astro';
+import Anchor from '../components/ui/Anchor.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import Button from '../components/ui/Button.astro';
+
+// TODO KELLY: replace Cal.com placeholder with paid booking URL
+const CAL_COM_URL = 'https://cal.com/kellynyland';
+
+const sections = [
+  { id: 'harry-potter', label: 'Harry Potter' },
+  { id: 'freespoke',    label: 'Freespoke' },
+  { id: 'popsockets',   label: 'PopSockets' },
+  { id: 'references',   label: 'References' },
+  { id: 'hire-me',      label: 'Hire me' },
+];
+
+const description = 'Work with Kelly Nyland. A small number of consulting engagements each year — launch, marketing, fundraising, and brand.';
+
+const caseStudies = [
+  { id: 'harry-potter', num: '01', title: 'Harry Potter', scope: 'Role + dates + 1-paragraph scope coming.' },
+  { id: 'freespoke',    num: '02', title: 'Freespoke',    scope: 'Role + dates + 1-paragraph scope coming.' },
+  { id: 'popsockets',   num: '03', title: 'PopSockets',   scope: 'Role + dates + 1-paragraph scope coming.' },
+];
+---
+
+<AnchoredLayout title="Hire — Kelly Nyland" description={description} sections={sections}>
+  <!-- Hero -->
+  <header class="hi-hero">
+    <h1 class="hi-hero__title">Work with me.</h1>
+    <p class="hi-hero__lead">
+      I take on a small number of consulting engagements per year — launch, go-to-market, fundraising, and brand.
+      Below: three recent case studies and a short path to getting on my calendar.
+    </p>
+  </header>
+
+  {caseStudies.map((cs) => (
+    <Anchor id={cs.id} class="hi-section">
+      <Eyebrow>Case study {cs.num}</Eyebrow>
+      <h2 class="hi-h2">{cs.title}</h2>
+      <p class="hi-subtitle">{cs.scope}</p>
+      <div class="hi-placeholder-img" aria-hidden="true" />
+      <p class="placeholder-note">Full case study coming from Kelly.</p>
+      {/* TODO KELLY: ${cs.id} case study details + images */}
+    </Anchor>
+  ))}
+
+  <!-- #references -->
+  <Anchor id="references" class="hi-section">
+    <Eyebrow>References</Eyebrow>
+    <h2 class="hi-h2">References</h2>
+    <p class="hi-subtitle">
+      References available on request — names + companies only, no contact info or public links.
+    </p>
+    <ul class="placeholder-list">
+      <li>Reference · Company</li>
+      <li>Reference · Company</li>
+      <li>Reference · Company</li>
+    </ul>
+    <p class="placeholder-note">Placeholder — Kelly will provide names + companies only, no links or contact info.</p>
+    {/* TODO KELLY: references list — names + companies, no links or contact info */}
+  </Anchor>
+
+  <!-- #hire-me -->
+  <Anchor id="hire-me" class="hi-section">
+    <Eyebrow>Hire me</Eyebrow>
+    <h2 class="hi-h2">Get on my calendar.</h2>
+    <p class="hi-body">
+      I take on a small number of consulting engagements per year. Book a call to start the conversation.
+    </p>
+    <Button href={CAL_COM_URL} variant="primary" size="lg">Book a call →</Button>
+    <p class="hi-footnote">
+      Cal.com link placeholder — swapping to Kelly's paid booking URL before launch.
+    </p>
+  </Anchor>
+</AnchoredLayout>
+
+<style>
+  .hi-hero {
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+    margin-bottom: var(--space-12);
+  }
+  .hi-hero__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-4xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  .hi-hero__lead {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+  }
+
+  .hi-section {
+    padding-block: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .hi-section:last-child {
+    border-bottom: none;
+  }
+
+  .hi-h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  .hi-subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-6);
+  }
+  .hi-body {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-6);
+  }
+  .hi-footnote {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    color: var(--color-ink);
+    margin-top: var(--space-4);
+    letter-spacing: 0.04em;
+  }
+
+  .hi-placeholder-img {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    max-width: var(--width-content);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+  }
+
+  .placeholder-list {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-ink);
+    padding-left: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .placeholder-list li {
+    list-style: disc;
+    margin-left: var(--space-4);
+    margin-bottom: var(--space-2);
+  }
+
+  .placeholder-note {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+    padding: var(--space-3) var(--space-4);
+    border: 1px dashed var(--color-muted);
+    border-radius: var(--radius-md);
+    display: inline-block;
+  }
+</style>

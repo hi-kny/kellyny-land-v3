@@ -1,0 +1,47 @@
+---
+interface Props {
+  label: string
+}
+
+const { label } = Astro.props
+const repeats = 20
+const text = Array(repeats).fill(label).join(' ')
+---
+
+<div class="marquee-divider" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-text">{text}</span>
+    <span class="marquee-text">{text}</span>
+  </div>
+</div>
+
+<style>
+  .marquee-divider {
+    width: 100%;
+    overflow: hidden;
+    background: var(--color-ink);
+    padding: var(--space-4) 0;
+    user-select: none;
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-divider-scroll 30s linear infinite;
+  }
+  .marquee-text {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    font-weight: 500;
+    color: var(--color-muted);
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    text-transform: lowercase;
+    padding-right: var(--space-8);
+  }
+  @keyframes marquee-divider-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
+  }
+</style>

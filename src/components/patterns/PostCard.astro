@@ -1,0 +1,153 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  pubDate: Date | string;
+  description?: string;
+  category?: string;
+  image?: string;
+  readingTime?: string;
+  variant?: 'default' | 'feature';
+}
+
+const {
+  href,
+  title,
+  pubDate,
+  description,
+  category,
+  image,
+  readingTime,
+  variant = 'default',
+} = Astro.props;
+
+const date = pubDate instanceof Date ? pubDate : new Date(pubDate);
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+const iso = date.toISOString();
+
+const classList = ['post-card', `post-card--${variant}`].join(' ');
+---
+
+<a href={href} class={classList}>
+  {variant === 'feature' && image && (
+    <div class="post-card__image">
+      <img src={image} alt="" loading="lazy" decoding="async" />
+    </div>
+  )}
+  <div class="post-card__body">
+    {category && <p class="post-card__category">{category}</p>}
+    <h3 class="post-card__title">{title}</h3>
+    {description && <p class="post-card__desc">{description}</p>}
+    <div class="post-card__meta">
+      <time datetime={iso}>{formattedDate}</time>
+      {readingTime && <><span aria-hidden="true">·</span><span>{readingTime}</span></>}
+    </div>
+  </div>
+</a>
+
+<style>
+  .post-card {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    transition:
+      transform var(--motion-fast) var(--ease-out),
+      box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .post-card:hover {
+    transform: translateY(-1px);
+  }
+
+  /* default — list-style row, no image */
+  .post-card--default {
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+    display: grid;
+    gap: var(--space-2);
+  }
+  .post-card--default:hover {
+    transform: none;
+  }
+  .post-card--default .post-card__title {
+    font-size: var(--text-xl);
+  }
+
+  /* feature — large card with optional image */
+  .post-card--feature {
+    background: var(--color-canvas);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .post-card--feature:hover {
+    border-color: var(--color-orange-text);
+    box-shadow: var(--shadow-md);
+  }
+  .post-card__image {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+  .post-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .post-card--feature .post-card__body {
+    padding: var(--space-6);
+  }
+  .post-card--feature .post-card__title {
+    font-size: var(--text-2xl);
+  }
+
+  .post-card__category {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-orange-text);
+    margin-bottom: var(--space-2);
+  }
+
+  .post-card__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    margin: 0 0 var(--space-2);
+  }
+
+  .post-card__desc {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    margin: 0 0 var(--space-3);
+  }
+
+  .post-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: var(--text-xs);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-card,
+    .post-card:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>

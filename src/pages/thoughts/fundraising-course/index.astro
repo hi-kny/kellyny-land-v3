@@ -1,0 +1,202 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Nav from '../../../components/patterns/Nav.astro';
+import Footer from '../../../components/patterns/Footer.astro';
+import Section from '../../../components/ui/Section.astro';
+import Eyebrow from '../../../components/ui/Eyebrow.astro';
+import Button from '../../../components/ui/Button.astro';
+import PullQuote from '../../../components/ui/PullQuote.astro';
+import LessonCard from '../../../components/patterns/LessonCard.astro';
+import JsonLd from '../../../components/ui/JsonLd.astro';
+import { fundraisingLessons } from '../../../data/mediaEmbeds.ts';
+
+const courseSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: 'Fundraising Course for Founders',
+  description: 'A free video series on fundraising tools and tactics for early-stage through Series A+ founders.',
+  provider: {
+    '@type': 'Person',
+    name: 'Kelly Nyland',
+    url: 'https://kellyny.land',
+  },
+  url: 'https://kellyny.land/thoughts/fundraising-course',
+  isAccessibleForFree: true,
+  numberOfLessons: 6,
+};
+
+const slugToStep = (s: string): number => {
+  if (s === 'fundraising-intro') return 0;
+  const m = s.match(/step(\d+)$/);
+  return m ? parseInt(m[1], 10) : 0;
+};
+
+const testimonials = [
+  { name: 'Sebastian', role: 'Founder · Web3, Gaming', quote: "There's a Marc Andreessen version somewhere — this one's better." },
+  { name: 'Nicole',    role: 'Founder · SaaS',          quote: 'Far and away the most valuable video. So useful.' },
+  { name: 'Jamilla',   role: 'Founder · SaaS',          quote: 'These videos became my go-to resource while fundraising.' },
+];
+
+const description = 'A free 6-step video course on fundraising for early-stage through Series A+ founders. Category and stage agnostic.';
+---
+
+<BaseLayout
+  title="Fundraising Course — Kelly Nyland"
+  description={description}
+  ogType="website"
+>
+  <Fragment slot="head">
+    <JsonLd schema={courseSchema} />
+  </Fragment>
+  <Nav slot="nav" />
+  <Section variant="content" padded>
+    <header class="course-hero">
+      <Eyebrow>Free Course · 6 Lessons</Eyebrow>
+      <h1 class="course-hero__title">How to fundraise.</h1>
+      <p class="course-hero__lead">
+        Six short video lessons walking through how to qualify investors, run a tight 3-week
+        process, prepare the documents you'll need, and turn rejection into insight. Free,
+        category-agnostic, and pulled directly from how I've raised across two IPOs and a
+        portfolio of seed-stage bets.
+      </p>
+      <div class="course-hero__cta">
+        <Button href="/thoughts/fundraising-course/step-0" variant="primary" size="lg">
+          Start with the Intro →
+        </Button>
+        <Button href="https://substack.com/@motherofdata" variant="ghost" size="md">
+          Get updates on Substack
+        </Button>
+      </div>
+    </header>
+
+    <section class="course-section">
+      <Eyebrow>Lessons</Eyebrow>
+      <h2 class="course-h2">The 6-step series</h2>
+      <ul class="course-lessons" role="list">
+        {fundraisingLessons.map((l) => {
+          const step = slugToStep(l.slug);
+          return (
+            <li>
+              <LessonCard
+                step={step}
+                title={l.shortTitle}
+                duration={l.duration}
+                emoji={l.emoji}
+                href={`/thoughts/fundraising-course/step-${step}`}
+              />
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+
+    <section class="course-section">
+      <Eyebrow>Founders' Reactions</Eyebrow>
+      <h2 class="course-h2">What founders said</h2>
+      <div class="course-testimonials">
+        {testimonials.map((t) => (
+          <PullQuote attribution={t.name} outlet={t.role}>
+            {t.quote}
+          </PullQuote>
+        ))}
+      </div>
+    </section>
+
+    <section class="course-cta">
+      <h2 class="course-cta__title">Want help running your raise?</h2>
+      <p class="course-cta__body">
+        I take on a small number of consulting engagements per year. Book a call to start the
+        conversation.
+      </p>
+      <Button href="/hire#hire-me" variant="primary" size="lg">
+        Book a call →
+      </Button>
+    </section>
+  </Section>
+  <Footer slot="footer" />
+</BaseLayout>
+
+<style>
+  .course-hero {
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+    margin-bottom: var(--space-12);
+  }
+  .course-hero__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-4xl);
+    line-height: var(--leading-tight);
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  @media (min-width: 768px) {
+    .course-hero__title { font-size: var(--text-5xl); }
+  }
+  .course-hero__lead {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-6);
+  }
+  .course-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .course-section {
+    padding-block: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .course-h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-6);
+  }
+
+  .course-lessons {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  @media (min-width: 768px) {
+    .course-lessons { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .course-testimonials {
+    display: grid;
+    gap: var(--space-4);
+  }
+  @media (min-width: 1024px) {
+    .course-testimonials { grid-template-columns: repeat(3, 1fr); }
+    .course-testimonials :global(.pullquote) { margin: 0; }
+  }
+
+  .course-cta {
+    margin-top: var(--space-12);
+    padding-block: var(--space-12);
+    text-align: center;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+  }
+  .course-cta__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-2xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-3);
+  }
+  .course-cta__body {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin: 0 auto var(--space-6);
+  }
+</style>

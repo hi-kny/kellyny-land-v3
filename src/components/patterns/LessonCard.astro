@@ -1,0 +1,123 @@
+---
+interface Props {
+  step: number;
+  title: string;
+  duration?: string;
+  href: string;
+  emoji?: string;
+}
+
+const { step, title, duration, href, emoji } = Astro.props;
+---
+
+<a href={href} class="lesson-card">
+  <div class="lesson-card__num" aria-hidden="true">
+    <span>{String(step).padStart(2, '0')}</span>
+  </div>
+  <div class="lesson-card__body">
+    <p class="lesson-card__step">Step {step}</p>
+    <h3 class="lesson-card__title">
+      {emoji && <span class="lesson-card__emoji" aria-hidden="true">{emoji}</span>}
+      {title}
+    </h3>
+    {duration && (
+      <p class="lesson-card__duration">
+        <span class="lesson-card__duration-pill">{duration}</span>
+      </p>
+    )}
+  </div>
+  <span class="lesson-card__arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+  .lesson-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-4);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-md);
+    color: inherit;
+    text-decoration: none;
+    min-height: 88px;
+    transition:
+      border-color var(--motion-fast) var(--ease-out),
+      transform var(--motion-fast) var(--ease-out);
+  }
+  .lesson-card:hover {
+    border-color: var(--color-orange-text);
+    transform: translateY(-1px);
+  }
+
+  .lesson-card__num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: 1;
+    color: var(--color-orange-text);
+    min-width: 56px;
+  }
+
+  .lesson-card__step {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    margin-bottom: var(--space-1);
+  }
+
+  .lesson-card__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-base);
+    line-height: var(--leading-snug);
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .lesson-card__emoji {
+    font-size: var(--text-lg);
+  }
+
+  .lesson-card__duration {
+    margin-top: var(--space-2);
+    margin-bottom: 0;
+  }
+
+  .lesson-card__duration-pill {
+    display: inline-block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: var(--text-xs);
+    color: var(--color-ink);
+    padding: var(--space-1) var(--space-2);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+  }
+
+  .lesson-card__arrow {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--color-orange-text);
+    transition: transform var(--motion-fast) var(--ease-out);
+  }
+  .lesson-card:hover .lesson-card__arrow {
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lesson-card,
+    .lesson-card__arrow,
+    .lesson-card:hover,
+    .lesson-card:hover .lesson-card__arrow {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>

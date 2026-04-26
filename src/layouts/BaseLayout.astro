@@ -1,5 +1,6 @@
 ---
 import JsonLd from '../components/ui/JsonLd.astro';
+import ConsentBanner from '../components/ui/ConsentBanner.astro';
 import '../styles/global.css';
 
 // Fonts — self-hosted via fontsource.
@@ -100,7 +101,8 @@ const personSchema = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
 
-    <!-- TODO KELLY: Re-add GA4 behind ConsentBanner (KLY-58) with new kellyny.land property ID. -->
+    {/* GA4 is loaded by <ConsentBanner /> only after the user accepts.
+        Set PUBLIC_GA4_MEASUREMENT_ID in production env to enable.  KLY-58. */}
 
     <!-- Base structured data -->
     <JsonLd schema={[websiteSchema, personSchema]} />
@@ -115,5 +117,6 @@ const personSchema = {
       <slot />
     </main>
     <slot name="footer" />
+    <ConsentBanner />
   </body>
 </html>

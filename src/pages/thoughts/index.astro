@@ -1,0 +1,426 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Nav from '../../components/patterns/Nav.astro';
+import Footer from '../../components/patterns/Footer.astro';
+import Section from '../../components/ui/Section.astro';
+import Eyebrow from '../../components/ui/Eyebrow.astro';
+import Button from '../../components/ui/Button.astro';
+import Card from '../../components/ui/Card.astro';
+import PostCard from '../../components/patterns/PostCard.astro';
+import LessonCard from '../../components/patterns/LessonCard.astro';
+import { fundraisingLessons } from '../../data/mediaEmbeds.ts';
+
+// Pull both collections; tolerate Notion failure.
+const mdxEntries = await getCollection('thoughts');
+let notionEntries: any[] = [];
+try {
+  notionEntries = await getCollection('notionBlog');
+} catch (err) {
+  console.warn('[thoughts/index] notionBlog unavailable:', (err as Error)?.message);
+}
+
+// Normalize both into a unified Post shape so we can sort + render together.
+type UnifiedPost = {
+  href: string;
+  title: string;
+  pubDate: Date;
+  description?: string;
+  category?: string;
+  image?: string;
+  featured: boolean;
+};
+
+const slugify = (s: string) =>
+  s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
+
+const mdxPosts: UnifiedPost[] = mdxEntries.map((entry: any) => ({
+  href: `/thoughts/${entry.id.replace(/\.mdx?$/, '')}`,
+  title: entry.data.title,
+  pubDate: new Date(entry.data.pubDate),
+  description: entry.data.description,
+  category: entry.data.category,
+  image: entry.data.image,
+  featured: Boolean(entry.data.featured),
+}));
+
+const notionPosts: UnifiedPost[] = notionEntries.map((entry: any) => {
+  // Properties are pre-transformed by notion-astro-loader's schema:
+  //   title -> string, rich_text -> string, date -> { start, end }, select -> { name }
+  const props = entry.data?.properties ?? {};
+  const title = (typeof props.Title === 'string' ? props.Title : '') || 'Untitled';
+  const pdate = props['Publish Date'];
+  const startISO =
+    (pdate && typeof pdate === 'object' && 'start' in pdate ? pdate.start : pdate) ??
+    Date.now();
+  return {
+    href: `/thoughts/${slugify(title)}`,
+    title,
+    pubDate: new Date(startISO),
+    description: typeof props['Key Takeaway'] === 'string' ? props['Key Takeaway'] : undefined,
+    category: props['Content Type']?.name ?? 'Founder Memo',
+    image: entry.data?.cover?.external?.url ?? entry.data?.cover?.file?.url,
+    featured: typeof props.Series === 'string' && props.Series.toLowerCase() === 'featured',
+  };
+});
+
+const allPosts: UnifiedPost[] = [...mdxPosts, ...notionPosts].sort(
+  (a, b) => b.pubDate.getTime() - a.pubDate.getTime(),
+);
+
+// Featured rail: prefer explicit `featured: true`. Fall back to first 2.
+const featured = allPosts.filter((p) => p.featured).slice(0, 2);
+const featuredFallback = featured.length > 0 ? featured : allPosts.slice(0, 2);
+
+const filterChips = ['All', 'Founder Memo', 'Essay', 'Course', 'Podcast', 'Class'];
+
+// Slug-to-step mapping for the course preview row.
+const lessonSlugToStep = (s: string): number => {
+  if (s === 'fundraising-intro') return 0;
+  const m = s.match(/step(\d+)$/);
+  return m ? parseInt(m[1], 10) : 0;
+};
+
+const description =
+  "Kelly Nyland's writing, course, podcasts, and college class — what I'm thinking about and what I'm building.";
+---
+
+<BaseLayout title="Thoughts — Kelly Nyland" description={description}>
+  <Nav slot="nav" />
+  <Section variant="content" padded>
+    {/* Hero */}
+    <header class="th-hero">
+      <Eyebrow>Kelly Nyland · Writing & Teaching</Eyebrow>
+      <h1 class="th-hero__title">Here's what I'm interested in and what I'm building.</h1>
+      <p class="th-hero__lead">
+        Long-form essays, a free fundraising course, two podcast mini-series, and a college class on
+        starting things. New work shows up here first; subscribe on Substack for the email version.
+      </p>
+      <div class="th-hero__cta">
+        <Button href="https://substack.com/@motherofdata" variant="ghost" size="md">
+          Subscribe on Substack →
+        </Button>
+        <Button href="/thoughts/bridging-the-skill-gap-between-digital-and-physical-worlds" variant="primary" size="md">
+          Read the founder memo →
+        </Button>
+      </div>
+    </header>
+
+    {/* Featured posts */}
+    {featuredFallback.length > 0 && (
+      <section class="th-section">
+        <Eyebrow>Featured</Eyebrow>
+        <h2 class="th-h2">Start here</h2>
+        <div class="th-featured">
+          {featuredFallback.map((p) => (
+            <PostCard
+              variant="feature"
+              href={p.href}
+              title={p.title}
+              pubDate={p.pubDate}
+              description={p.description}
+              category={p.category}
+              image={p.image}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* All writing */}
+    <section class="th-section">
+      <Eyebrow>All writing</Eyebrow>
+      <h2 class="th-h2">Everything, reverse chronological</h2>
+      <div class="filter-chips" role="group" aria-label="Filter by category">
+        {filterChips.map((chip, i) => (
+          <button
+            type="button"
+            class="filter-chip"
+            data-filter={chip}
+            aria-pressed={i === 0 ? 'true' : 'false'}
+          >
+            {chip}
+          </button>
+        ))}
+      </div>
+      <ul class="th-list" role="list">
+        {allPosts.map((p) => (
+          <li class="th-list__item" data-category={p.category ?? ''}>
+            <PostCard
+              variant="default"
+              href={p.href}
+              title={p.title}
+              pubDate={p.pubDate}
+              description={p.description}
+              category={p.category}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {/* Fundraising course preview */}
+    <section class="th-section">
+      <Eyebrow>Course</Eyebrow>
+      <h2 class="th-h2">How to fundraise — a 6-step series</h2>
+      <p class="th-section__lead">
+        Free video lessons walking through how to qualify investors, run a tight 3-week process,
+        and turn rejection into insight.
+      </p>
+      <div class="lesson-row">
+        {fundraisingLessons.slice(0, 6).map((l) => {
+          const step = lessonSlugToStep(l.slug);
+          return (
+            <LessonCard
+              step={step}
+              title={l.shortTitle}
+              duration={l.duration}
+              emoji={l.emoji}
+              href={`/thoughts/fundraising-course/step-${step}`}
+            />
+          );
+        })}
+      </div>
+      <Button href="/thoughts/fundraising-course" variant="ghost" size="md">
+        See the full course →
+      </Button>
+    </section>
+
+    {/* Podcasts */}
+    <section class="th-section">
+      <Eyebrow>Podcasts</Eyebrow>
+      <h2 class="th-h2">Two mini-series</h2>
+      <div class="th-cards-2">
+        <Card href="/thoughts/blind-data">
+          <p class="th-card__cat">Podcast</p>
+          <h3 class="th-card__title">Blind Data</h3>
+          <p class="th-card__desc">
+            Personal data ownership and the shift from corporate exploitation to consumer
+            sovereignty. Co-hosted with Rhenee Bartlett & Ryan Hornberger.
+          </p>
+        </Card>
+        <Card href="/thoughts/payment-processing">
+          <p class="th-card__cat">Podcast</p>
+          <h3 class="th-card__title">Payment Processing</h3>
+          <p class="th-card__desc">
+            An investor's guide to the ever-changing payment processing landscape. Where the value
+            actually accrues, and what shifts with stablecoins and AI fraud detection.
+          </p>
+        </Card>
+      </div>
+    </section>
+
+    {/* College class */}
+    <section class="th-section">
+      <Eyebrow>Class</Eyebrow>
+      <h2 class="th-h2">Teaching</h2>
+      <Card href="/thoughts/intro-to-entrepreneurship">
+        <p class="th-card__cat">College class</p>
+        <h3 class="th-card__title">Intro to Entrepreneurship</h3>
+        <p class="th-card__desc">
+          A guest lecture series on the unglamorous middle of starting things — failure as input,
+          criticism as a tool, and the few skills that compound.
+        </p>
+      </Card>
+    </section>
+
+    {/* Substack subscribe rail */}
+    <section class="th-substack">
+      <h2 class="th-substack__title">Get the next one in your inbox.</h2>
+      <Button href="https://substack.com/@motherofdata" variant="primary" size="lg">
+        Subscribe on Substack →
+      </Button>
+    </section>
+  </Section>
+  <Footer slot="footer" />
+</BaseLayout>
+
+<script>
+  // Filter chips — toggle .is-hidden on items by category match.
+  const chips = document.querySelectorAll<HTMLButtonElement>('.filter-chip');
+  const items = document.querySelectorAll<HTMLElement>('.th-list__item');
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const selected = chip.dataset.filter ?? 'All';
+      chips.forEach((c) =>
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false'),
+      );
+      items.forEach((item) => {
+        const cat = item.dataset.category ?? '';
+        item.classList.toggle('is-hidden', !(selected === 'All' || cat === selected));
+      });
+    });
+  });
+</script>
+
+<style>
+  .th-hero {
+    padding-bottom: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+    margin-bottom: var(--space-12);
+  }
+  .th-hero__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-4xl);
+    line-height: var(--leading-tight);
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+  @media (min-width: 768px) {
+    .th-hero__title { font-size: var(--text-5xl); }
+  }
+  .th-hero__lead {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-6);
+  }
+  .th-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .th-section {
+    padding-block: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .th-section:last-of-type {
+    border-bottom: none;
+  }
+  .th-section__lead {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-ink);
+    max-width: var(--width-prose);
+    margin-bottom: var(--space-6);
+  }
+  .th-h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-3xl);
+    line-height: var(--leading-snug);
+    color: var(--color-ink);
+    margin-bottom: var(--space-6);
+  }
+
+  .th-featured {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 768px) {
+    .th-featured { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+  }
+  .filter-chip {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    min-height: 36px;
+    transition:
+      background-color var(--motion-fast) var(--ease-out),
+      color var(--motion-fast) var(--ease-out),
+      border-color var(--motion-fast) var(--ease-out);
+  }
+  .filter-chip:hover {
+    border-color: var(--color-orange-text);
+    color: var(--color-orange-text);
+  }
+  .filter-chip[aria-pressed='true'] {
+    background: var(--color-ink);
+    color: var(--color-canvas);
+    border-color: var(--color-ink);
+  }
+
+  .th-list {
+    margin-block: 0;
+    padding: 0;
+  }
+  .th-list__item.is-hidden {
+    display: none;
+  }
+
+  .lesson-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+  @media (min-width: 768px) {
+    .lesson-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .th-cards-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 768px) {
+    .th-cards-2 { grid-template-columns: repeat(2, 1fr); }
+  }
+  .th-card__cat {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-orange-text);
+    margin-bottom: var(--space-2);
+  }
+  .th-card__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-2);
+  }
+  .th-card__desc {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  .th-substack {
+    margin-top: var(--space-16);
+    padding-block: var(--space-12);
+    text-align: center;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+  }
+  .th-substack__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-2xl);
+    color: var(--color-ink);
+    margin-bottom: var(--space-4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .filter-chip {
+      transition: none;
+    }
+  }
+</style>

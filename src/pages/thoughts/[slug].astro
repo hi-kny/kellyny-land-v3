@@ -1,0 +1,92 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const mdxEntries = await getCollection('thoughts');
+  let notionEntries: any[] = [];
+  try {
+    notionEntries = await getCollection('notionBlog');
+  } catch (err) {
+    console.warn('[thoughts/[slug]] notionBlog collection unavailable:', (err as Error)?.message);
+  }
+
+  const mdxPaths = mdxEntries.map((entry) => ({
+    params: { slug: entry.id.replace(/\.mdx?$/, '') },
+    props: { entry, source: 'mdx' as const },
+  }));
+
+  // notion-astro-loader's `transformedPropertySchema.title` flattens the title
+  // property into a plain string. So `entry.data.properties.Title` is a string
+  // for our schema. Slugify it for human-readable URLs; if two posts slugify
+  // the same, the second wins (acceptable for the curated set).
+  const notionPaths = notionEntries.map((entry: any) => {
+    const rawTitle = entry.data?.properties?.Title;
+    const title = typeof rawTitle === 'string' ? rawTitle : (entry.id ?? 'untitled');
+    const slug = String(title)
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 80) || entry.id;
+    return {
+      params: { slug },
+      props: { entry, source: 'notion' as const },
+    };
+  });
+
+  // De-duplicate any slug collisions between MDX and Notion (MDX wins).
+  const seen = new Set<string>();
+  const all = [...mdxPaths, ...notionPaths].filter((p) => {
+    if (seen.has(p.params.slug)) return false;
+    seen.add(p.params.slug);
+    return true;
+  });
+
+  return all;
+}
+
+const { entry, source } = Astro.props;
+const { Content } = await render(entry as any);
+
+let title: string;
+let description: string | undefined;
+let pubDate: Date | string | undefined;
+let category: string | undefined;
+let image: string | undefined;
+
+if (source === 'mdx') {
+  const data = (entry as any).data;
+  title = data.title;
+  description = data.description;
+  pubDate = data.pubDate;
+  category = data.category;
+  image = data.image;
+} else {
+  // Notion entries have transformed property values (title -> string,
+  // rich_text -> string, date -> { start, end }, select -> { name }).
+  const props = (entry as any).data?.properties ?? {};
+  title = (typeof props.Title === 'string' ? props.Title : '') || 'Untitled';
+  description =
+    typeof props['Key Takeaway'] === 'string' ? props['Key Takeaway'] : undefined;
+  const pdate = props['Publish Date'];
+  pubDate =
+    (pdate && typeof pdate === 'object' && 'start' in pdate ? pdate.start : pdate) ??
+    undefined;
+  category = props['Content Type']?.name ?? 'Founder Memo';
+  image =
+    (entry as any).data?.cover?.external?.url ??
+    (entry as any).data?.cover?.file?.url ??
+    undefined;
+}
+---
+
+<PostLayout
+  title={title}
+  description={description}
+  pubDate={pubDate}
+  category={category}
+  image={image}
+>
+  <Content />
+</PostLayout>

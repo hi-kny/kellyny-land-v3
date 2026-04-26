@@ -1,0 +1,171 @@
+---
+// First-load consent banner. Persists choice in localStorage.
+// GA4 only loads if the user accepts.
+//
+// Usage: include once in BaseLayout.astro (already wired). Set the
+// PUBLIC_GA4_MEASUREMENT_ID env var to enable GA loading post-consent;
+// when unset, the script tag is omitted entirely.
+//
+// TODO KELLY: provide PUBLIC_GA4_MEASUREMENT_ID for kellyny.land in
+// the production env, then redeploy.
+const ga4Id = import.meta.env.PUBLIC_GA4_MEASUREMENT_ID;
+---
+
+<aside id="consent-banner" class="consent" role="dialog" aria-labelledby="consent-title" aria-describedby="consent-body" hidden>
+  <div class="consent__inner">
+    <p id="consent-title" class="consent__title">Cookies & analytics</p>
+    <p id="consent-body" class="consent__body">
+      I use a small amount of analytics to see which posts get read. Accept to opt in,
+      or decline — both are remembered. No third-party trackers, no ad cookies.
+    </p>
+    <div class="consent__actions">
+      <button type="button" class="consent__btn consent__btn--accept" data-consent="accept">
+        Accept
+      </button>
+      <button type="button" class="consent__btn consent__btn--decline" data-consent="decline">
+        Decline
+      </button>
+    </div>
+  </div>
+</aside>
+
+<script is:inline define:vars={{ ga4Id }}>
+  (function () {
+    const STORAGE_KEY = 'kly-consent-v1';
+    const banner = document.getElementById('consent-banner');
+    if (!banner) return;
+
+    const stored = (() => {
+      try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+    })();
+
+    const loadGa = () => {
+      if (!ga4Id || window.__klyGaLoaded) return;
+      window.__klyGaLoaded = true;
+      const s = document.createElement('script');
+      s.async = true;
+      s.src = `https://www.googletagmanager.com/gtag/js?id=${ga4Id}`;
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', ga4Id, { anonymize_ip: true });
+    };
+
+    const persist = (choice) => {
+      try { localStorage.setItem(STORAGE_KEY, choice); } catch {}
+    };
+
+    if (stored === 'accept') {
+      loadGa();
+      // Don't show banner — user already opted in.
+    } else if (stored === 'decline') {
+      // Don't show banner — user already opted out.
+    } else {
+      banner.removeAttribute('hidden');
+      requestAnimationFrame(() => banner.classList.add('is-visible'));
+    }
+
+    banner.addEventListener('click', (e) => {
+      const target = e.target instanceof Element ? e.target.closest('[data-consent]') : null;
+      if (!target) return;
+      const choice = target.getAttribute('data-consent');
+      if (choice !== 'accept' && choice !== 'decline') return;
+      persist(choice);
+      banner.classList.remove('is-visible');
+      setTimeout(() => banner.setAttribute('hidden', ''), 240);
+      if (choice === 'accept') loadGa();
+    });
+  })();
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    bottom: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
+    z-index: 60;
+    background: var(--color-ink);
+    color: var(--color-canvas);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity var(--motion-base) var(--ease-out),
+      transform var(--motion-base) var(--ease-out);
+    max-width: 480px;
+    margin-inline: auto;
+  }
+  .consent.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .consent__inner {
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .consent__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    letter-spacing: 0.04em;
+    color: var(--color-canvas);
+    margin: 0;
+  }
+  .consent__body {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--color-canvas);
+    margin: 0;
+    opacity: 0.9;
+  }
+  .consent__actions {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: flex-end;
+  }
+  .consent__btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    padding: var(--space-2) var(--space-4);
+    min-height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-canvas);
+    cursor: pointer;
+    transition:
+      background-color var(--motion-fast) var(--ease-out),
+      color var(--motion-fast) var(--ease-out);
+  }
+  .consent__btn--accept {
+    background: var(--color-cta-bg);
+    color: var(--color-ink);
+    border-color: var(--color-cta-bg);
+  }
+  .consent__btn--accept:hover {
+    background: var(--color-orange-text);
+    color: var(--color-canvas);
+    border-color: var(--color-orange-text);
+  }
+  .consent__btn--decline {
+    background: transparent;
+    color: var(--color-canvas);
+  }
+  .consent__btn--decline:hover {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .consent,
+    .consent__btn {
+      transition: none;
+    }
+  }
+</style>

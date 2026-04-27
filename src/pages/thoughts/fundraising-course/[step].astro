@@ -109,6 +109,12 @@ const nextLesson = next !== null ? fundraisingLessons[next] : null;
     border-radius: var(--radius-lg);
     overflow: hidden;
   }
+  /* Cancel YouTubeEmbed's vertical margin when wrapped in .step-video so
+     the iframe sits flush against the rounded container. */
+  .step-video :global(.embed-container) {
+    margin-block: 0;
+    border-radius: 0;
+  }
 
   .step-topics {
     padding-block: var(--space-8);

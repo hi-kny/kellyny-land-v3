@@ -63,7 +63,13 @@ const ga4Id = import.meta.env.PUBLIC_GA4_MEASUREMENT_ID;
       // Don't show banner — user already opted out.
     } else {
       banner.removeAttribute('hidden');
-      requestAnimationFrame(() => banner.classList.add('is-visible'));
+      // Double-rAF: the first frame applies the unhidden layout; the second
+      // adds the class so the browser actually sees a transition between
+      // opacity:0 and opacity:1. A single rAF batches both changes and the
+      // transition skips. (Bug seen during sweep — banner stuck at opacity:0.)
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => banner.classList.add('is-visible'));
+      });
     }
 
     banner.addEventListener('click', (e) => {
@@ -91,6 +97,9 @@ const ga4Id = import.meta.env.PUBLIC_GA4_MEASUREMENT_ID;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     opacity: 0;
+    /* Don't intercept clicks while opacity:0 — without this the invisible
+       banner blocks clicks on whatever sits under it. */
+    pointer-events: none;
     transform: translateY(8px);
     transition:
       opacity var(--motion-base) var(--ease-out),
@@ -100,7 +109,12 @@ const ga4Id = import.meta.env.PUBLIC_GA4_MEASUREMENT_ID;
   }
   .consent.is-visible {
     opacity: 1;
+    pointer-events: auto;
     transform: translateY(0);
+  }
+  /* `[hidden]` collapses the box entirely so consent decision survives nav. */
+  .consent[hidden] {
+    display: none !important;
   }
 
   .consent__inner {

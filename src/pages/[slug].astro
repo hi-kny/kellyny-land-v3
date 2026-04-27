@@ -6,6 +6,7 @@ import ImageGallery from '../components/embeds/ImageGallery.astro';
 import FigmaEmbed from '../components/embeds/FigmaEmbed.astro';
 import YouTubeEmbed from '../components/embeds/YouTubeEmbed.astro';
 import { projects, getNeighborSlugs } from '../data/portfolioData.ts';
+import { portfolioVideos } from '../data/mediaEmbeds.ts';
 
 export async function getStaticPaths() {
   return projects.map((p) => ({
@@ -16,6 +17,13 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 const { prev, next } = getNeighborSlugs(project.slug);
+
+// Videos are split between `portfolioData.videos` (inline) and
+// `mediaEmbeds.portfolioVideos` (keyed by slug, ported from kellyny-land).
+// Prefer inline, fall back to the keyed map. Without this merge, bb8 /
+// ar-drone / sprk / ollie / roli / pop-up / zik / zikmu / soundwall /
+// textshop wouldn't render any YouTube row.
+const videos = project.videos ?? portfolioVideos[project.slug] ?? [];
 
 // Resolve sibling titles for prev/next labels
 const slugToTitle = new Map(projects.map((p) => [p.slug, p.title]));
@@ -149,12 +157,12 @@ const fallbackImages =
     </div>
   )}
 
-  {project.videos && project.videos.length > 0 && (
+  {videos.length > 0 && (
     <section class="cs-videos">
       <Eyebrow>Video</Eyebrow>
       <h2 class="cs-h2">Watch</h2>
       <div class="cs-video-row">
-        {project.videos.map((v: any) => (
+        {videos.map((v: any) => (
           <YouTubeEmbed
             videoId={v.type === 'playlist' ? undefined : v.id}
             playlistId={v.type === 'playlist' ? v.id : undefined}

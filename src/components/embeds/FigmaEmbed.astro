@@ -15,7 +15,18 @@ const {
   allowFullscreen = true
 } = Astro.props
 
-const embedUrl = `https://www.figma.com/embed?embed_host=astro&url=${encodeURIComponent(url)}`
+/**
+ * Figma supports two iframe patterns:
+ *   - figma.site (Figma Sites — published pages): embed the URL directly.
+ *   - figma.com (design files / FigJam / prototypes): wrap in /embed?url=…
+ *
+ * The /embed wrapper rejects figma.site URLs with "Invalid URL", so we sniff
+ * the host first and only wrap when needed. (kellyny-land-v3 KLY-51 fix.)
+ */
+const isFigmaSite = /(^|\.)figma\.site$/i.test(new URL(url).hostname)
+const embedUrl = isFigmaSite
+  ? url
+  : `https://www.figma.com/embed?embed_host=astro&url=${encodeURIComponent(url)}`
 ---
 
 <div class="embed-container" style={`width: ${width}; aspect-ratio: ${aspectRatio};`}>
@@ -50,7 +61,7 @@ const embedUrl = `https://www.figma.com/embed?embed_host=astro&url=${encodeURICo
 
   .embed-fallback {
     font-size: var(--text-sm);
-    color: var(--color-muted);
+    color: var(--color-ink);
     margin-top: var(--space-2);
   }
 

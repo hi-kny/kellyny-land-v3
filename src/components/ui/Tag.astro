@@ -1,14 +1,14 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
 
-type TagColor = 'orange' | 'blue' | 'green' | 'muted';
+type TagColor = 'accent' | 'blue' | 'green' | 'muted';
 
 interface Props extends HTMLAttributes<'span'> {
   color?: TagColor;
   interactive?: boolean;
 }
 
-const { color = 'orange', interactive = false, class: className = '', ...rest } = Astro.props;
+const { color = 'accent', interactive = false, class: className = '', ...rest } = Astro.props;
 const classList = ['tag', `tag--${color}`, interactive && 'tag--interactive', className]
   .filter(Boolean)
   .join(' ');
@@ -36,7 +36,7 @@ const classList = ['tag', `tag--${color}`, interactive && 'tag--interactive', cl
     white-space: nowrap;
   }
 
-  .tag--orange { color: var(--color-orange-text); }
+  .tag--accent { color: var(--color-blue-text); }
   .tag--blue   { color: var(--color-blue); }
   .tag--green  { color: var(--color-green); }
   .tag--muted  { color: var(--color-muted); }

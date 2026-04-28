@@ -193,8 +193,8 @@ const description = '23 products across consumer AI, hardware, robotics, fintech
       border-color var(--motion-fast) var(--ease-out);
   }
   .filter-chip:hover {
-    border-color: var(--color-orange-text);
-    color: var(--color-orange-text);
+    border-color: var(--color-blue-text);
+    color: var(--color-blue-text);
   }
   .filter-chip[aria-pressed='true'] {
     background: var(--color-ink);
@@ -217,13 +217,18 @@ const description = '23 products across consumer AI, hardware, robotics, fintech
     justify-content: space-between;
     gap: var(--space-4);
   }
+  /* Inside the dark .yt-cta the foreground is canvas (white). The blue
+     accent doesn't read against ink — switch to canvas with reduced
+     opacity for the eyebrow + arrow so they're still soft accents but
+     pass AA. */
   .yt-cta__eyebrow {
     font-family: var(--font-display);
     font-weight: 500;
     font-size: var(--text-xs);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-orange);
+    color: var(--color-canvas);
+    opacity: 0.7;
     margin-bottom: var(--space-2);
   }
   .yt-cta__title {
@@ -242,7 +247,7 @@ const description = '23 products across consumer AI, hardware, robotics, fintech
   .yt-cta__arrow {
     font-family: var(--font-display);
     font-size: var(--text-3xl);
-    color: var(--color-orange);
+    color: var(--color-canvas);
   }
 
   @media (prefers-reduced-motion: reduce) {

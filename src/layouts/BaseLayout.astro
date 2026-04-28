@@ -4,12 +4,9 @@ import ConsentBanner from '../components/ui/ConsentBanner.astro';
 import '../styles/global.css';
 
 // Fonts — self-hosted via fontsource.
-// Poppins (display): 400 / 500 / 600 / 700
-// Lora (body): 400 / 500 / 700 + 400-italic / 700-italic
-import '@fontsource/poppins/400.css';
-import '@fontsource/poppins/500.css';
-import '@fontsource/poppins/600.css';
-import '@fontsource/poppins/700.css';
+// Inter Variable (display): single variable file covers 100–900 weight.
+// Lora (body): 400 / 500 / 700 + 400-italic / 700-italic.
+import '@fontsource-variable/inter';
 import '@fontsource/lora/400.css';
 import '@fontsource/lora/500.css';
 import '@fontsource/lora/700.css';
@@ -70,7 +67,7 @@ const personSchema = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#faf9f5" />
+    <meta name="theme-color" content="#fafaf9" />
 
     <title>{title}</title>
     <meta name="description" content={description} />
